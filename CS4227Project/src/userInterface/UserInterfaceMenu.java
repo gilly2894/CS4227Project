@@ -359,7 +359,7 @@ public class UserInterfaceMenu {
 	//    Inputs
 	public String getTypeInput()
 	{
-		Object [] typeSelection = {"Admin", "Customer", "Staff", "Supplier"};
+		Object [] typeSelection = {"Admin", "Customer", "Staff"};
 		Object userType = JOptionPane.showInputDialog(null, "User Type:","", 1 , null, typeSelection, typeSelection[0]);
 		return (String) userType;
 	}

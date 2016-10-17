@@ -1,12 +1,15 @@
 package userInterface;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
+import media.MediaItem;
 import program.DatabaseFetcher;
 import program.TypeOfFactoryGenerator;
 import users.C_AdminActions;
+import users.C_CustomerActions;
 import users.I_UserActions;
 import users.UserClass;
 import users.UserFactory;
@@ -173,17 +176,55 @@ public class UserInterfaceMenu {
 						//concreate class
 						userMenu.userActions(returnedSelection, updateUser);
 					}
+					else if(returnedSelection.equals("Logout")){
+						//this will break the loop and log user out
+						stillLoggedIn = false;
+					}
+				}
+			}
+			else if(type.matches("Customer"))
+			{
+				while(stillLoggedIn)
+				{
+					// this shows the customer dropdown menu and returns the selection from it
+					returnedSelection = showCustomerMenu();
+					
+					// new C_AdminActions(); calls the constructor of C_AdminActions(C is for control class) so that 
+					// userMenu.methodName() will call the methods in C_AdminActions
+					userMenu = new C_CustomerActions();
+					
+					//
+					if(returnedSelection.equals("Browse Media List"))
+					{
+						browseMediaList();
+					}
+					
+					else if(returnedSelection.equals("Search by Category"))
+					{
+						//to be filled
+					}
+					
+					else if(returnedSelection.equals("Search for Film"))
+					{
+						//to be filled
+					}
+					
+					else if(returnedSelection.equals("Watch Film"))
+					{
+						//to be filled
+					}
+					
+					else if(returnedSelection.equals("Add Funds to Wallet"))
+					{
+						//to be filled
+					}
+					
 					else if(returnedSelection.equals("Logout"))
 					{
 						//this will break the loop and log user out
 						stillLoggedIn = false;
 					}
 				}
-				
-			}
-			else if(type.matches("Customer"))
-			{
-				System.out.println("customerActionMenu");
 			}
 			else if(type.matches("Staff"))
 			{
@@ -193,6 +234,8 @@ public class UserInterfaceMenu {
 		
 		
 		
+	
+
 		public String addNewUser() throws IOException
 		{
 			UserClass newUser = null;
@@ -326,6 +369,120 @@ public class UserInterfaceMenu {
 				// 3)The new value
 				return updateString;
 			}
+			
+			public void browseMediaList(){
+				ArrayList<MediaItem> mediaList=null;
+				mediaList = databaseFetcher.getMediaItems();
+				boolean stillSearching = true, firstFive = false;
+				int k = 0;
+				String selectedFilm = "";
+				int remainder = mediaList.size()%5;
+				if(mediaList.size() == 0)
+				{
+					JOptionPane.showMessageDialog(null, "There are no films in the database!", "Error", JOptionPane.ERROR_MESSAGE);
+				}
+				while(stillSearching)
+				{
+					firstFive = false;
+					if(mediaList.size() <= 5)
+					{
+						if(mediaList.size() == 5)
+						{
+							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), mediaList.get(k+3).getMediaType()+" - " + mediaList.get(k+3).getTitle(), mediaList.get(k+4).getMediaType()+" - " + mediaList.get(k+4).getTitle(), "Quit"};
+							selectedFilm = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+							firstFive = true;
+						}
+						else if(remainder == 1)
+						{
+							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), "Quit"};
+							selectedFilm = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+							firstFive = true;
+						}
+						else if(remainder == 2)
+						{
+							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), "Quit"};
+							selectedFilm = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+							firstFive = true;
+						}
+						else if(remainder == 3)
+						{
+							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), "Quit"};
+							selectedFilm = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+							firstFive = true;
+						}
+						else if(remainder == 4)
+						{
+							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), mediaList.get(k+3).getMediaType()+" - " + mediaList.get(k+3).getTitle(), "Quit"};
+							selectedFilm = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+							firstFive = true;
+						}
+					}
+					if(!firstFive)
+					{
+						if(k == 0)
+						{	
+							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), mediaList.get(k+3).getMediaType()+" - " + mediaList.get(k+3).getTitle(), mediaList.get(k+4).getMediaType()+" - " + mediaList.get(k+4).getTitle(), "Show Next 5", "Quit"};
+							selectedFilm = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+						}
+						else if(k == mediaList.size()-remainder)
+						{
+							if(remainder == 1)
+							{
+								Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), "Show Previous 5", "Quit"};
+								selectedFilm = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+							}
+							else if(remainder == 2)
+							{
+								Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), "Show Previous 5", "Quit"};
+								selectedFilm = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+							}
+							else if(remainder == 3)
+							{
+								Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), "Show Previous 5", "Quit"};
+								selectedFilm = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+							}
+							else if(remainder == 4)
+							{
+								Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), mediaList.get(k+3).getMediaType()+" - " + mediaList.get(k+3).getTitle(), "Show Previous 5", "Quit"};
+								selectedFilm = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+							}
+						}
+						else
+						{
+							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k + 1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k + 2).getTitle(), mediaList.get(k+3).getMediaType()+" - " + mediaList.get(k + 3).getTitle(), mediaList.get(k+4).getMediaType()+" - " + mediaList.get(k + 4).getTitle(), "Show Previous 5", "Show Next 5", "Quit"};
+							selectedFilm = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+						}
+					}
+					
+					if(selectedFilm.equals("Quit"))
+						stillSearching=false;
+					else if(selectedFilm.equals("Show Next 5"))
+					{
+						k += 5;
+					}
+					else if(selectedFilm.equals("Show Previous 5"))
+					{
+						k -= 5;
+					}
+					/* else  (temporarily commented out)
+					{
+						stillSearching=false;
+						boolean filmFound=false;
+						for(int i = 0; i < mediaList.size() && !filmFound; i++)
+						{
+							if(selectedFilm.equals(mediaList.get(i).getTitle()))
+							{
+								filmFound = true;
+								return mediaList.getTitle(i);
+							}
+						}
+					} */
+				}
+				return;
+			}
+
+			
+			
 	
 	
 	//		 Menus
@@ -335,7 +492,7 @@ public class UserInterfaceMenu {
 	}
 	//new John
 	public String showCustomerMenu() {
-		Object [] selection = {"Browse Film List", "Search By Category", "Search for Film", "Watch Film", "Add Funds to Wallet", "Logout"};
+		Object [] selection = {"Browse Media List", "Search By Category", "Search for Film", "Watch Film", "Add Funds to Wallet", "Logout"};
 		return (String) JOptionPane.showInputDialog(null, "What action would you like to perform?","Customer : " + currentUser.getName(), 1 , null, selection, selection[0]);
 	}
 	
@@ -363,6 +520,7 @@ public class UserInterfaceMenu {
 		Object userType = JOptionPane.showInputDialog(null, "User Type:","", 1 , null, typeSelection, typeSelection[0]);
 		return (String) userType;
 	}
+	
 
 	public String getUsernameInput() {
 		return JOptionPane.showInputDialog(null, "Username:");

@@ -1,4 +1,4 @@
-package Products;
+package products;
 
 public interface I_ProductGroup {
 	public void productID();

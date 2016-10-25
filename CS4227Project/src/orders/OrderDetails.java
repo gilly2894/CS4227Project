@@ -1,4 +1,4 @@
-package Orders;
+package orders;
 public class OrderDetails {
 	private String orderID;
 	private String productID;

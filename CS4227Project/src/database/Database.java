@@ -31,6 +31,7 @@ public class Database {
 	
 	ArrayList<String> linesFromMediaItemsFile = new ArrayList<String>();
 	ArrayList<MediaItem> mediaItemsCatalogueList = new ArrayList<MediaItem>();
+	ArrayList<MediaItem> mediaItemsSuppliersList = new ArrayList<MediaItem>();
 	
 	ArrayList<String> linesFromCustomerRepositoryFile = new ArrayList<String>();
 	
@@ -141,6 +142,26 @@ public class Database {
 				return null;
 			}
 			return user;
+		}
+		
+		public MediaItem getMediaItemByName(String nameOfItem)
+		{	
+			MediaItem media=null;
+			boolean found=false;
+			for(int i=0;i<mediaItemsCatalogueList.size() && !found; i++)
+			{
+				if(nameOfItem.matches(mediaItemsCatalogueList.get(i).getTitle()))
+				{
+					media= mediaItemsCatalogueList.get(i);
+					found= true;
+				}
+					
+			}
+			if(!found)
+			{
+				return null;
+			}
+			return media;
 		}
 	    
 		//adds a new user, this updates the list of user objects and also writes out to the database
@@ -269,4 +290,16 @@ public class Database {
 		{
 			return mediaItemsCatalogueList;
 		}
+	    
+	   public MediaItem searchSuppliersDatabase(String nameOfItem)
+	   {
+			for(int i=0; i < mediaItemsSuppliersList.size(); i++)
+			{
+				if(nameOfItem.equals(mediaItemsSuppliersList.get(i).getTitle()))
+				{
+					return mediaItemsSuppliersList.get(i);
+				}
+			}
+			return null;
+	   }
 }

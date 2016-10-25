@@ -1,5 +1,6 @@
 package userInterface;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -204,9 +205,31 @@ public class UserInterfaceMenu {
 						//to be filled
 					}
 					
-					else if(returnedSelection.equals("Search for Film"))
+					else if(returnedSelection.equals("Search for Media Item"))
 					{
-						//to be filled
+						MediaItem media = searchforItem("MEGASTREAM");
+						
+						if(media!=null)
+						{
+							String returnString = currentUser.getUsername() + ",";
+							returnString+= media.getTitle() + ",";
+							String choice = customerMediaItemDetailsAndReturnedChoice(media);
+							if(!choice.equals("Cancel")) 
+							{
+								String choice2 = paymentMethod();
+								if(!choice2.equals("Cancel"))
+								{	
+									String choice3 = confirmPurchase();
+									returnString += (choice + ",");
+									returnString += (choice2 + ",");
+									returnString += choice3;
+									//returnedSelection is the result of the first dropdown : "Search For Film"
+									//returnString contains 3 comma separated values : currentUsers username, name of film,
+									//and the choice of whether they want to buy or rent it
+									userMenu.userActions(returnedSelection, returnString);
+								}
+							}
+						}
 					}
 					
 					else if(returnedSelection.equals("Watch Film"))
@@ -492,7 +515,7 @@ public class UserInterfaceMenu {
 	}
 	//new John
 	public String showCustomerMenu() {
-		Object [] selection = {"Browse Media List", "Search By Category", "Search for Film", "Watch Film", "Add Funds to Wallet", "Logout"};
+		Object [] selection = {"Browse Media List", "Search By Category", "Search for Media Item", "Watch Film", "Add Funds to Wallet", "Logout"};
 		return (String) JOptionPane.showInputDialog(null, "What action would you like to perform?","Customer : " + currentUser.getName(), 1 , null, selection, selection[0]);
 	}
 	
@@ -559,6 +582,50 @@ public class UserInterfaceMenu {
 	public String getFilmNameInput()
 	{
 		return JOptionPane.showInputDialog(null, "Enter the name of the film:");
+	}
+	
+	public MediaItem searchforItem(String mediaItemType) throws FileNotFoundException
+	{
+		MediaItem item=null;
+		boolean validMedia=false;
+		while (!validMedia)
+		{
+			String nameOfItem= JOptionPane.showInputDialog(null,"Enter name of media item: ");
+			if (mediaItemType.equalsIgnoreCase("MEGASTREAM"))
+					item= databaseFetcher.getMediaItemByString(nameOfItem);
+			else if(mediaItemType.equalsIgnoreCase("SUPPLIER"))
+				item=databaseFetcher.searchSuppliersDatabase(nameOfItem);
+			
+			if(item!=null)
+				validMedia=true;
+			else if(item==null)
+			{
+				JOptionPane.showMessageDialog(null, "Item not found in database!", "Error", JOptionPane.ERROR_MESSAGE);
+				return null;
+			}
+
+		}
+		
+		
+		return item;
+	}
+	
+	public String customerMediaItemDetailsAndReturnedChoice(MediaItem media)
+	{
+		Object [] selection = {"Rent Film", "Buy Film", "Cancel"};
+		return (String) JOptionPane.showInputDialog(null, media.toString(),"Customer : " + currentUser.getName(), 1 , null, selection, selection[0]);
+	}
+	
+	public String paymentMethod()
+	{
+		Object [] selection = {"Credit Card", "Wallet", "Cancel"};
+		return (String) JOptionPane.showInputDialog(null, "Method of Payment?", "Customer : " + currentUser.getName(), 1 , null, selection, selection[0]);
+	}
+	
+	public String confirmPurchase()
+	{
+		Object [] selection = {"Confirm Purchase", "Cancel", "Exit"};
+		return (String) JOptionPane.showInputDialog(null, "Please confirm purchase", "Customer : " + currentUser.getName(), 1 , null, selection, selection[0]);
 	}
 
 }

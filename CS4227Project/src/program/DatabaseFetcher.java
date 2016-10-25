@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import database.Database;
 import media.FilmClass;
+import media.MediaItem;
 import users.UserClass;
 
 public class DatabaseFetcher {
@@ -16,6 +17,13 @@ public class DatabaseFetcher {
 		return database.getUserByName(userName);
 	}
 	
+	public MediaItem getMediaItemByString(String mediaName)
+	{
+		return database.getMediaItemByName(mediaName);
+	}
+	
+	
+	
 	public void addUser(UserClass currentUser) throws IOException
 	{
 		database.addUser(currentUser);
@@ -24,6 +32,11 @@ public class DatabaseFetcher {
 	public int getHighestUserID()
 	{
 		return database.getUsers().get(database.getUsers().size()-1).getUserID();
+	}
+	
+	public ArrayList<MediaItem> getMediaItems()
+	{
+		return database.getMediaItems();
 	}
 //	public ArrayList<FilmClass> getListOfFilms(String filmListType)
 //	{
@@ -40,10 +53,10 @@ public class DatabaseFetcher {
 //		return megaStreamDatabase.getFilmByName(nameOfFilm);
 //	}
 //
-//	public FilmClass searchSuppliersDatabase(String nameOfFilm) throws FileNotFoundException 
-//	{
-//		return megaStreamDatabase.searchSuppliersDatabase(nameOfFilm);
-//	}
+	public MediaItem searchSuppliersDatabase(String nameOfFilm) throws FileNotFoundException 
+	{
+		return database.searchSuppliersDatabase(nameOfFilm);
+	}
 //
 //	public String[] getUserFilmSelection(String userName) throws IOException 
 //	{

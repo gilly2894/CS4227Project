@@ -17,6 +17,7 @@ UserFactory userFactory = new UserFactory();
 	File customerRepositoryFile = new File(customerRepository);
 	
 	
+	
 	// Reading and writing objects
 	FileWriter fw;
 	BufferedWriter bw;

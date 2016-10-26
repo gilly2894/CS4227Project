@@ -17,9 +17,6 @@ UserFactory userFactory = new UserFactory();
 	File customerRepositoryFile = new File(customerRepository);
 	
 	
-	public static void callMethod(){
-		System.out.println("Method called");
-	}
 	// Reading and writing objects
 	FileWriter fw;
 	BufferedWriter bw;

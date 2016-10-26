@@ -380,17 +380,18 @@ public void updateShoppingCart(String id, String qty, int UserID) throws Excepti
 			aLineFromFile = in.nextLine();
 			String[]components = aLineFromFile.split(",");
 		    if (components[0].equals(Integer.toString(UserID))) {
-		    	newLine = components[0];
+		    	aLineFromFile = components[0];
 		        for(int j=1; j < components.length; j+=2){
 		        	if(components[j].matches(id)){
 		        		components[j+1] = qty;
 		        	}
-		        	newLine+= "," + components[j] + "," + components[j+1];
+		        	aLineFromFile += "," + components[j] + "," + components[j+1];
 		        }
-		        linesFromShoppingCartFile.add(newLine);
 		    }
 		    linesFromShoppingCartFile.add(aLineFromFile);
 		}
+	
+		System.out.println(linesFromShoppingCartFile);
 		BufferedWriter bwCart = new BufferedWriter(new FileWriter(shoppingCartFile, false));						
 		for(int i=0; i<linesFromShoppingCartFile.size(); i++)				
 		{

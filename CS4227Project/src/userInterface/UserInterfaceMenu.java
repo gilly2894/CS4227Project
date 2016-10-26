@@ -210,17 +210,28 @@ public class UserInterfaceMenu {
 					
 					else if(returnedSelection.equals("View Shopping Cart"))
 					{	
-						/*Map<MediaItem,String> cartList = databaseFetcher.getShoppingCart(Integer.toString(currentUser.getUserID()));
-						for(Map.Entry<MediaItem, String> entry : cartList.entrySet()){
-							System.out.println("Title of Movie: " + entry.getKey().getTitle() + "\t Quantity: " + entry.getValue());
+						Object [] selection = {"Display Items in Console", "Change Quantity", "Quit"};
+						String choice = (String) JOptionPane.showInputDialog(null, "Shopping Cart Menu!","", 1 , null, selection, selection[0]);
+						
+						 if(choice.equals("Display Items in Console"))
+						{
+							 Map<MediaItem,String> cartList = databaseFetcher.getShoppingCart(Integer.toString(currentUser.getUserID()));
+								for(Map.Entry<MediaItem, String> entry : cartList.entrySet()){
+									System.out.println("Title of Movie: " + entry.getKey().getTitle() + "\t Quantity: " + entry.getValue());
+								}
 						}
-						*/
-						String id = "7234";//JOptionPane.showInputDialog(null, "Enter Media ID to change quantity of:");
-						String qty = "77";//JOptionPane.showInputDialog(null, "Enter quantity:");
-						
-						databaseFetcher.updateShoppingCart(id, qty, currentUser.getUserID());
-						
-						
+						 
+						 else if(choice.equals("Change Quantity"))
+							{
+							 String id = JOptionPane.showInputDialog(null, "Enter Media ID to change quantity of:");
+							 String qty = JOptionPane.showInputDialog(null, "Enter quantity:");
+							 databaseFetcher.updateShoppingCart(id, qty, currentUser.getUserID());
+							}
+						 
+						 else if(choice.equals("Quit"))
+							{
+								break;
+							} 
 					}
 					
 					else if(returnedSelection.equals("Search for Media Item"))

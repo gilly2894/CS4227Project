@@ -7,18 +7,19 @@ import program.*;
 import users.*;
 
 public class Database {
-//testing if Github works
-	UserFactory userFactory = new UserFactory();
+UserFactory userFactory = new UserFactory();
 	private final String usersDatabase = "users.txt";
 	private final String mediaItemsDatabase = "mediaItems.txt";
 	private final String customerRepository = "customerRepository.txt";
-	private final String tester = "testGit";
 	
 	File usersFile = new File(usersDatabase);
 	File mediaItemsFile = new File(mediaItemsDatabase);
 	File customerRepositoryFile = new File(customerRepository);
 	
 	
+	public static void callMeth(){
+		System.out.println("Method called");
+	}
 	// Reading and writing objects
 	FileWriter fw;
 	BufferedWriter bw;

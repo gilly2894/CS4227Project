@@ -3,6 +3,9 @@ package userInterface;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.swing.JOptionPane;
 
@@ -203,6 +206,21 @@ public class UserInterfaceMenu {
 					else if(returnedSelection.equals("Search by Category"))
 					{
 						//to be filled
+					}
+					
+					else if(returnedSelection.equals("View Shopping Cart"))
+					{	
+						/*Map<MediaItem,String> cartList = databaseFetcher.getShoppingCart(Integer.toString(currentUser.getUserID()));
+						for(Map.Entry<MediaItem, String> entry : cartList.entrySet()){
+							System.out.println("Title of Movie: " + entry.getKey().getTitle() + "\t Quantity: " + entry.getValue());
+						}
+						*/
+						String id = "7234";//JOptionPane.showInputDialog(null, "Enter Media ID to change quantity of:");
+						String qty = "77";//JOptionPane.showInputDialog(null, "Enter quantity:");
+						
+						databaseFetcher.updateShoppingCart(id, qty, currentUser.getUserID());
+						
+						
 					}
 					
 					else if(returnedSelection.equals("Search for Media Item"))
@@ -515,7 +533,7 @@ public class UserInterfaceMenu {
 	}
 	//new John
 	public String showCustomerMenu() {
-		Object [] selection = {"Browse Media List", "Search By Category", "Search for Media Item", "Watch Film", "Add Funds to Wallet", "Logout"};
+		Object [] selection = {"Browse Media List", "Search By Category","View Shopping Cart", "Search for Media Item", "Watch Film", "Add Funds to Wallet", "Logout"};
 		return (String) JOptionPane.showInputDialog(null, "What action would you like to perform?","Customer : " + currentUser.getName(), 1 , null, selection, selection[0]);
 	}
 	

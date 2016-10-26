@@ -2,6 +2,9 @@ package database;
 
 import java.io.*;
 import java.util.*;
+
+import org.junit.Test;
+
 import media.*;
 import program.*;
 import users.*;
@@ -11,11 +14,12 @@ UserFactory userFactory = new UserFactory();
 	private final String usersDatabase = "users.txt";
 	private final String mediaItemsDatabase = "mediaItems.txt";
 	private final String customerRepository = "customerRepository.txt";
+	private final String shoppingCart = "shoppingCart.txt";
 	
 	File usersFile = new File(usersDatabase);
 	File mediaItemsFile = new File(mediaItemsDatabase);
 	File customerRepositoryFile = new File(customerRepository);
-	
+	File shoppingCartFile = new File (shoppingCart);
 	
 	
 	// Reading and writing objects
@@ -28,12 +32,11 @@ UserFactory userFactory = new UserFactory();
 	
 	ArrayList<String> linesFromUsersFile = new ArrayList<String>();
 	ArrayList<UserClass> usersList = new ArrayList<UserClass>();
-	
 	ArrayList<String> linesFromMediaItemsFile = new ArrayList<String>();
 	ArrayList<MediaItem> mediaItemsCatalogueList = new ArrayList<MediaItem>();
 	ArrayList<MediaItem> mediaItemsSuppliersList = new ArrayList<MediaItem>();
-	
 	ArrayList<String> linesFromCustomerRepositoryFile = new ArrayList<String>();
+	ArrayList<String> linesFromShoppingCartFile = new ArrayList<String>();
 	
 	// This is the one single instance of this class it is populated in getInstance()
 	private static Database databaseFirstInstance = null;
@@ -45,6 +48,7 @@ UserFactory userFactory = new UserFactory();
 			populateUsersList();
 			populateMediaCatalogue();
 			populateCustomerRepository();
+			populateShoppingCartRepository();
 			
 			//Need to add other methods in here so that the films lists will be updated and any other database too
 		}
@@ -106,6 +110,18 @@ UserFactory userFactory = new UserFactory();
 			
 		}
 	    
+	    public void populateShoppingCartRepository() throws FileNotFoundException{
+	    	in = new Scanner(shoppingCartFile);
+			String aLineFromFile = "";
+			while(in.hasNext())
+			{
+				aLineFromFile = in.nextLine();
+				linesFromShoppingCartFile.add(aLineFromFile);
+			}
+			
+	    }
+	    
+	    
 	    public void populateCustomerRepository() throws FileNotFoundException
 		{
 			in = new Scanner(customerRepositoryFile);
@@ -116,6 +132,32 @@ UserFactory userFactory = new UserFactory();
 				linesFromCustomerRepositoryFile.add(lineFromFile);
 			}
 		}
+	    
+	    //get shopping cart items
+	    public HashMap<MediaItem, String> getShoppingCart(String userID) throws FileNotFoundException 
+	    {
+	    	HashMap <MediaItem, String> cartList = new HashMap<MediaItem, String>();
+	    	MediaItem m;
+	    	in = new Scanner(shoppingCartFile);
+			String aLineFromFile = "";
+			MediaItem mediaItem;
+			while(in.hasNext())
+			{
+				aLineFromFile = in.nextLine();
+				linesFromShoppingCartFile.add(aLineFromFile);
+				String[] components = aLineFromFile.split(",");
+				if(components[0].equals(userID)){
+					for(int i=1; i < components.length; i+= 2){
+						m = getMediaItemByID(components[i]);
+						cartList.put(m, components[i+1]);
+					}
+				}
+			}
+			return cartList;
+		}
+	    
+	    
+	    
 	    
 	    //	Users Section
 	    
@@ -151,6 +193,26 @@ UserFactory userFactory = new UserFactory();
 			for(int i=0;i<mediaItemsCatalogueList.size() && !found; i++)
 			{
 				if(nameOfItem.matches(mediaItemsCatalogueList.get(i).getTitle()))
+				{
+					media= mediaItemsCatalogueList.get(i);
+					found= true;
+				}
+					
+			}
+			if(!found)
+			{
+				return null;
+			}
+			return media;
+		}
+		
+		public MediaItem getMediaItemByID(String mediaID)
+		{	
+			MediaItem media=null;
+			boolean found=false;
+			for(int i=0;i<mediaItemsCatalogueList.size() && !found; i++)
+			{
+				if(mediaID.matches(mediaItemsCatalogueList.get(i).getMediaID()))
 				{
 					media= mediaItemsCatalogueList.get(i);
 					found= true;
@@ -302,4 +364,39 @@ UserFactory userFactory = new UserFactory();
 			}
 			return null;
 	   }
+
+
+
+
+public void updateShoppingCart(String id, String qty, int UserID) throws Exception {
+	String aLineFromFile;
+	String newLine;
+	
+	if(!linesFromShoppingCartFile.isEmpty()){
+		linesFromShoppingCartFile.clear();
+	}
+	in = new Scanner(shoppingCartFile);
+		while (in.hasNext()) {
+			aLineFromFile = in.nextLine();
+			String[]components = aLineFromFile.split(",");
+		    if (components[0].equals(Integer.toString(UserID))) {
+		    	newLine = components[0];
+		        for(int j=1; j < components.length; j+=2){
+		        	if(components[j].matches(id)){
+		        		components[j+1] = qty;
+		        	}
+		        	newLine+= "," + components[j] + "," + components[j+1];
+		        }
+		        linesFromShoppingCartFile.add(newLine);
+		    }
+		    linesFromShoppingCartFile.add(aLineFromFile);
+		}
+		BufferedWriter bwCart = new BufferedWriter(new FileWriter(shoppingCartFile, false));						
+		for(int i=0; i<linesFromShoppingCartFile.size(); i++)				
+		{
+			bwCart.write(linesFromShoppingCartFile.get(i));
+			bwCart.newLine();
+		}
+		bwCart.close();
+}
 }

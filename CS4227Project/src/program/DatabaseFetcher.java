@@ -3,6 +3,9 @@ package program;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Scanner;
+
 import database.Database;
 import media.FilmClass;
 import media.MediaItem;
@@ -38,6 +41,11 @@ public class DatabaseFetcher {
 	{
 		return database.getMediaItems();
 	}
+	
+	public HashMap<MediaItem, String> getShoppingCart(String userID) throws FileNotFoundException
+    {
+    	return database.getShoppingCart(userID);
+	}
 //	public ArrayList<FilmClass> getListOfFilms(String filmListType)
 //	{
 //		ArrayList<FilmClass> filmList=null;
@@ -68,5 +76,15 @@ public class DatabaseFetcher {
 //		return megaStreamDatabase.showListOfFilms();
 //	}
 //
+
+	public void updateShoppingCart(String id, String qty, int userID){
+		try {
+			database.updateShoppingCart(id,qty, userID);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
 
 }

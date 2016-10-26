@@ -7,11 +7,12 @@ import program.*;
 import users.*;
 
 public class Database {
-
+//testing if Github works
 	UserFactory userFactory = new UserFactory();
 	private final String usersDatabase = "users.txt";
 	private final String mediaItemsDatabase = "mediaItems.txt";
 	private final String customerRepository = "customerRepository.txt";
+	private final String tester = "testGit";
 	
 	File usersFile = new File(usersDatabase);
 	File mediaItemsFile = new File(mediaItemsDatabase);

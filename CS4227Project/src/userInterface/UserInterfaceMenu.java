@@ -261,9 +261,18 @@ public class UserInterfaceMenu {
 						}
 					}
 					
-					else if(returnedSelection.equals("Watch Film"))
+					else if(returnedSelection.equals("View Media Repository"))
 					{
 						//to be filled
+						//String returnString = currentUser.getUserID() + ",";
+						int userID = currentUser.getUserID();
+						String chosenMediaItemID = viewCustomersMediaRepository(userID);
+						if(!chosenMediaItemID.equals("Cancel"))
+						{	
+							String returnFilmName = chosenMediaItemID;
+							userMenu.userActions(returnedSelection, returnFilmName);
+						}
+						
 					}
 					
 					else if(returnedSelection.equals("Add Funds to Wallet"))
@@ -532,6 +541,22 @@ public class UserInterfaceMenu {
 				}
 				return;
 			}
+			
+			
+			public String viewCustomersMediaRepository(int userID)
+			{
+				ArrayList<MediaItem> mediaItems = databaseFetcher.getCustomersMediaRepository(userID);
+				Object[] fullListToDisplay = new Object [mediaItems.size() + 1];
+				for(int i=0; i<mediaItems.size(); i++)
+				{
+					fullListToDisplay[i] = mediaItems.get(i).getTitle() + " - " + mediaItems.get(i).getMediaType();
+					
+					
+				}
+				fullListToDisplay[mediaItems.size()] = "Cancel";
+				String selection = (String) JOptionPane.showInputDialog(null, "Choose Media Item", "Customer : " + currentUser.getName(), 1 , null, fullListToDisplay, fullListToDisplay[0]);
+				return selection.substring(0, selection.indexOf("-")-1);
+			}
 
 			
 			
@@ -544,7 +569,7 @@ public class UserInterfaceMenu {
 	}
 	//new John
 	public String showCustomerMenu() {
-		Object [] selection = {"Browse Media List", "Search By Category","View Shopping Cart", "Search for Media Item", "Watch Film", "Add Funds to Wallet", "Logout"};
+		Object [] selection = {"Browse Media List", "Search By Category","View Shopping Cart", "Search for Media Item", "View Media Repository", "Add Funds to Wallet", "Logout"};
 		return (String) JOptionPane.showInputDialog(null, "What action would you like to perform?","Customer : " + currentUser.getName(), 1 , null, selection, selection[0]);
 	}
 	
@@ -621,7 +646,7 @@ public class UserInterfaceMenu {
 		{
 			String nameOfItem= JOptionPane.showInputDialog(null,"Enter name of media item: ");
 			if (mediaItemType.equalsIgnoreCase("MEGASTREAM"))
-					item= databaseFetcher.getMediaItemByString(nameOfItem);
+					item= databaseFetcher.getMediaItemByName(nameOfItem);
 			else if(mediaItemType.equalsIgnoreCase("SUPPLIER"))
 				item=databaseFetcher.searchSuppliersDatabase(nameOfItem);
 			

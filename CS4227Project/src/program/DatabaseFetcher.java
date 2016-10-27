@@ -20,7 +20,7 @@ public class DatabaseFetcher {
 		return database.getUserByName(userName);
 	}
 	
-	public MediaItem getMediaItemByString(String mediaName)
+	public MediaItem getMediaItemByName(String mediaName)
 	{
 		return database.getMediaItemByName(mediaName);
 	}
@@ -77,6 +77,11 @@ public class DatabaseFetcher {
 //	}
 //
 
+	public ArrayList<MediaItem> getCustomersMediaRepository(int userID)
+	{
+		return database.getCustomersMediaRepository(userID);
+	}
+	
 	public void updateShoppingCart(String id, String qty, int userID){
 		try {
 			database.updateShoppingCart(id,qty, userID);

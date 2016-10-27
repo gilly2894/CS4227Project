@@ -2,6 +2,8 @@ package users;
 
 import java.io.*;
 
+import streaming.StreamMedia;
+
 public class C_CustomerActions implements I_UserActions 
 {
 	public void userActions(String dropdownSelection, String returnedString) throws IOException
@@ -18,9 +20,11 @@ public class C_CustomerActions implements I_UserActions
 		{
 
 		}
-		else if(dropdownSelection.equals("Watch Film"))
+		else if(dropdownSelection.equals("View Media Repository"))
 		{
-
+			//returnedString for "View Media Repository" is the name of the media item selected 
+			StreamMedia streamMedia = new StreamMedia();
+			streamMedia.stream(returnedString);
 		}
 		else if(dropdownSelection.equals("Add Funds to Wallet"))
 		{

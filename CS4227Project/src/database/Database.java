@@ -3,7 +3,7 @@ package database;
 import java.io.*;
 import java.util.*;
 
-import org.junit.Test;
+//import org.junit.Test;
 
 import media.*;
 import program.*;
@@ -31,12 +31,14 @@ UserFactory userFactory = new UserFactory();
 	UserClass user;
 	
 	ArrayList<String> linesFromUsersFile = new ArrayList<String>();
-	ArrayList<UserClass> usersList = new ArrayList<UserClass>();
 	ArrayList<String> linesFromMediaItemsFile = new ArrayList<String>();
-	ArrayList<MediaItem> mediaItemsCatalogueList = new ArrayList<MediaItem>();
-	ArrayList<MediaItem> mediaItemsSuppliersList = new ArrayList<MediaItem>();
 	ArrayList<String> linesFromCustomerRepositoryFile = new ArrayList<String>();
 	ArrayList<String> linesFromShoppingCartFile = new ArrayList<String>();
+	
+	ArrayList<UserClass> usersList = new ArrayList<UserClass>();
+	ArrayList<MediaItem> mediaItemsCatalogueList = new ArrayList<MediaItem>();
+	ArrayList<MediaItem> mediaItemsSuppliersList = new ArrayList<MediaItem>();
+
 	
 	// This is the one single instance of this class it is populated in getInstance()
 	private static Database databaseFirstInstance = null;
@@ -363,6 +365,31 @@ UserFactory userFactory = new UserFactory();
 				}
 			}
 			return null;
+	   }
+	   
+	   public ArrayList<MediaItem> getCustomersMediaRepository(int userID)
+	   {
+		   ArrayList<MediaItem> customersMediaItems = new ArrayList<MediaItem>();
+		   boolean foundUser=false;
+		   for(int i=0; i<linesFromCustomerRepositoryFile.size() && !foundUser; i++)
+		   {
+			   String line[] = linesFromCustomerRepositoryFile.get(i).split(",");
+			   int userIdNumber = Integer.parseInt(line[0]);
+			   if(userID == userIdNumber)
+			   {
+				   for(int x=1; x<line.length; x++)
+				   {
+					   customersMediaItems.add(getMediaItemByID(line[x]));
+				   }
+				   foundUser = true;
+				   return customersMediaItems;
+			   }
+		   }
+		   
+		   
+		   		   
+		   return null;
+		    
 	   }
 
 

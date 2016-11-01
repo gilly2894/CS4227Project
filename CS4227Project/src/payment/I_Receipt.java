@@ -2,5 +2,5 @@ package payment;
 
 public interface I_Receipt {
 	
-	public String PrintReceipt();
+	public String PrintReceipt(String media);
 }

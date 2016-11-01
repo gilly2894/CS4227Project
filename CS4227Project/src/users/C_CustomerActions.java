@@ -2,6 +2,7 @@ package users;
 
 import java.io.*;
 
+import payment.AddToWallet;
 import streaming.StreamMedia;
 
 public class C_CustomerActions implements I_UserActions 
@@ -28,7 +29,8 @@ public class C_CustomerActions implements I_UserActions
 		}
 		else if(dropdownSelection.equals("Add Funds to Wallet"))
 		{
-
+			payment.AddToWallet execute = new AddToWallet();
+			execute.wallet(returnedString);
 		}
 	}
 	

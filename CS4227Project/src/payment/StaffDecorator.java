@@ -6,11 +6,11 @@ public class StaffDecorator extends ReceiptDecorator {
 		super(decoratedReceipt);
 	}
 	
-	public String PrintReceipt()
+	public String PrintReceipt(String media)
 	{
 		String staffGreeting= "You've successfully ordered such items to be supplied to you.";
 		
-		String total= staffGreeting + decoratedReceipt.PrintReceipt();
+		String total= staffGreeting + decoratedReceipt.PrintReceipt(media);
 		return total;
 	}
 

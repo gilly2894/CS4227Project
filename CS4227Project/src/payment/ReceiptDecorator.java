@@ -4,7 +4,7 @@ public class ReceiptDecorator implements I_Receipt {
 
 	protected I_Receipt decoratedReceipt;
 	
-	public ReceiptDecorator(I_Receipt decoratedReceipt)
+	public ReceiptDecorator(I_Receipt decoratedReceipt) //Object to be decorated
 	{
 		this.decoratedReceipt= decoratedReceipt;
 	}
@@ -13,6 +13,11 @@ public class ReceiptDecorator implements I_Receipt {
 		String receipt="";
 		receipt= decoratedReceipt.PrintReceipt();
 		 return receipt;
+		 
+		 
+		 
+		 
+		 
 	}
 
 }

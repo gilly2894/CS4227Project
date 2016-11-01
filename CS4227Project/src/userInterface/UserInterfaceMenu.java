@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import javax.swing.JOptionPane;
-
+import payment.*;
 import media.MediaItem;
 import program.DatabaseFetcher;
 import program.TypeOfFactoryGenerator;
@@ -44,6 +44,11 @@ public class UserInterfaceMenu {
 				quit=true;
 			}
 		}
+	}
+	
+	public void showNewWallet(String newWallet) throws IOException
+	{
+		JOptionPane.showMessageDialog(null, newWallet);
 	}
 	
 	public void Login() throws IOException
@@ -251,7 +256,12 @@ public class UserInterfaceMenu {
 									String choice3 = confirmPurchase();
 									returnString += (choice + ",");
 									returnString += (choice2 + ",");
+									
 									returnString += choice3;
+									if(choice3.equals("Confirm Purchase"))
+									{
+										displayReceipt(media);
+									}
 									//returnedSelection is the result of the first dropdown : "Search For Film"
 									//returnString contains 3 comma separated values : currentUsers username, name of film,
 									//and the choice of whether they want to buy or rent it
@@ -277,7 +287,16 @@ public class UserInterfaceMenu {
 					
 					else if(returnedSelection.equals("Add Funds to Wallet"))
 					{
-						//to be filled
+						String username= currentUser.getUsername();
+						String ammount= amountToAddToWallet();
+						
+						String confirmation= confirmPurchase();
+						if (confirmation!= "Cancel" || ammount!= "Cancel")
+						{
+							String id_amount= username + "," + ammount;
+							userMenu.userActions(returnedSelection, id_amount);
+						}
+						
 					}
 					
 					else if(returnedSelection.equals("Logout"))
@@ -567,6 +586,8 @@ public class UserInterfaceMenu {
 		Object [] selection = {"Add User", "Delete User", "Update User", "Logout"};
 		return (String) JOptionPane.showInputDialog(null, "What action would you like to perform?","Admin : " + currentUser.getName(), 1 , null, selection, selection[0]);
 	}
+	
+	
 	//new John
 	public String showCustomerMenu() {
 		Object [] selection = {"Browse Media List", "Search By Category","View Shopping Cart", "Search for Media Item", "View Media Repository", "Add Funds to Wallet", "Logout"};
@@ -680,6 +701,21 @@ public class UserInterfaceMenu {
 	{
 		Object [] selection = {"Confirm Purchase", "Cancel", "Exit"};
 		return (String) JOptionPane.showInputDialog(null, "Please confirm purchase", "Customer : " + currentUser.getName(), 1 , null, selection, selection[0]);
+		
+	}
+	
+	public void displayReceipt(MediaItem media) throws IOException
+	{
+		I_Receipt receipt= new ReceiptA();
+		receipt= new CustomerDecorator(receipt);
+		JOptionPane.showMessageDialog(null,receipt.PrintReceipt(media.getTitle()));
+		userActionMenu();
+	}
+	
+	public String amountToAddToWallet()
+	{
+		Object [] selection = {"€100", "€50", "€20", "€10", "Cancel"};
+		return (String) JOptionPane.showInputDialog(null, "Choose amount to add to wallet", "Customer : " + currentUser.getName(), 1 , null, selection, selection[0]);
 	}
 
 }

@@ -9,9 +9,9 @@ public class ReceiptDecorator implements I_Receipt {
 		this.decoratedReceipt= decoratedReceipt;
 	}
 	@Override
-	public String PrintReceipt() {
+	public String PrintReceipt(String media) {
 		String receipt="";
-		receipt= decoratedReceipt.PrintReceipt();
+		receipt= decoratedReceipt.PrintReceipt(media);
 		 return receipt;
 		 
 		 

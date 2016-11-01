@@ -1,11 +1,14 @@
 package payment;
+import database.Database;
 
 public class ReceiptA implements I_Receipt {
 
+	private Database database= Database.getInstance();
 	@Override
-	public String PrintReceipt() {
-		// TODO Auto-generated method stub
-		return null;
+	public String PrintReceipt(String media) {
+		
+		String basicText = "You paid €" + database.getMediaItemByName(media).getPrice() + " for " + media;
+		return basicText;
 	}
 
 	

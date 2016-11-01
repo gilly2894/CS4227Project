@@ -24,13 +24,22 @@ public class UserInterfaceMenu {
 	UserFactory userFactory = new UserFactory();
 	UserClass currentUser;
 	I_UserActions userMenu = null;
+	I_Command command = null;
+	MenuSelectionInvoker invoker = new MenuSelectionInvoker();
 	
-	public void showMainMenu() throws IOException {
+	// receivers
+	
+	
+	
+	// Menus
+	
+	public void showMainMenu() throws IOException 
+	{
 		boolean quit=false;		
 		while(!quit)
 		{
 			Object [] selection = {"Log In", "Register as a new customer", "Quit"};
-			String mainMenuSelection = (String) JOptionPane.showInputDialog(null, "Welcome to MegaStream!","", 1 , null, selection, selection[0]);
+			String mainMenuSelection = (String) JOptionPane.showInputDialog(null, "Welcome to A-Z!","", 1 , null, selection, selection[0]);
 			if(mainMenuSelection.equals("Log In"))
 			{
 				Login();	
@@ -73,10 +82,12 @@ public class UserInterfaceMenu {
 			else
 				JOptionPane.showMessageDialog(null, userName + " does not match a user in the database!", "Error", JOptionPane.ERROR_MESSAGE);
 		}
-		JOptionPane.showMessageDialog(null, "Logged in!\n\nWelcome to MegaStream " + currentUser.getName());
+		JOptionPane.showMessageDialog(null, "Logged in!\n\nWelcome to A-Z " + currentUser.getName());
 		
 		//  go into the correct functionality for the type of user you are
-		userActionMenu();
+		//userActionMenu();
+		
+		newActionMenu();
 		
 	}
 	
@@ -126,6 +137,80 @@ public class UserInterfaceMenu {
 		userActionMenu();
 	}
 	
+	public void newActionMenu() throws IOException
+	{
+		boolean stillLoggedIn = true;
+		String returnedMenuSelection = "";
+		
+		// this checks what type of users you are
+		String type = currentUser.getType();
+		
+		// then goes in to the correct functionality based on what type of user you are
+		if(type.matches("Admin"))
+		{
+			while(stillLoggedIn)
+			{
+				// this shows the Admin dropdown menu and returns the selection from it
+				returnedMenuSelection = showAdminMenu();
+				
+				// userMenu is of reference type I_UserActions, which is the base class(An interface)
+				// new C_AdminActions(); calls the constructor of C_AdminActions(C is for control class) so that 
+				// userMenu.methodName() will call the methods in C_AdminActions
+				
+				// DONT NEED(I Think)!
+				userMenu = new C_AdminActions();
+				
+				
+				
+				if(returnedMenuSelection.equals("Add User"))
+				{
+					// calls the method to get the user input for a new user
+					String userToCreate = addNewUser();
+					
+					//calls the userActions method that is in C_AdminActions as userMenu was created with C_AdminActions as the
+					//concrete class
+					//userMenu.userActions(returnedMenuSelection, userToCreate);
+					
+					invoker.setCommand(new AF_AddNewUserCommand(new C_AdminActions()));
+					invoker.optionSelectedWithStringParam(userToCreate);
+				
+				}
+				
+				else if(returnedMenuSelection.equals("Delete User"))
+				{
+					// calls the method to get the name of the user you want to delete
+					String userToRemove = UserToRemove();
+					
+					// calls the userActions method that is in C_AdminActions as userMenu was created with C_AdminActions as the
+					// concrete class
+					// userMenu.userActions(returnedMenuSelection, userToRemove);
+					
+					
+					invoker.setCommand(new AF_RemoveUserCommand(new C_AdminActions()));
+					invoker.optionSelectedWithStringParam(userToRemove);
+				}
+				
+				else if(returnedMenuSelection.equals("Update User"))
+				{
+					//  calls the method to get the user to be updated, what part is being updated, and the new value
+					String updateUser = UserToUpdate();
+					
+					//calls the userActions method that is in C_AdminActions as userMenu was created with C_AdminActions as the
+					//concrete class
+					//userMenu.userActions(returnedMenuSelection, updateUser);
+					
+					invoker.setCommand(new AF_UpdateUserCommand(new C_AdminActions()));
+					invoker.optionSelectedWithStringParam(updateUser);
+				}
+				else if(returnedMenuSelection.equals("Logout")){
+					//this will break the loop and log user out
+					stillLoggedIn = false;
+				}
+			}
+		}
+	}
+	
+	
 	
 	//This is the class that lets us access the business logic
 		public void userActionMenu() throws IOException
@@ -166,8 +251,8 @@ public class UserInterfaceMenu {
 						// calls the method to get the name of the user you want to delete
 						String userToRemove = UserToRemove();
 						
-						//calls the userActions method that is in C_AdminActions as userMenu was created with C_AdminActions as the
-						//concreate class
+						// calls the userActions method that is in C_AdminActions as userMenu was created with C_AdminActions as the
+						// concrete class
 						userMenu.userActions(returnedSelection, userToRemove);
 					}
 					
@@ -298,12 +383,17 @@ public class UserInterfaceMenu {
 	
 
 		public String addNewUser() throws IOException
-		{
+		{			
+			// Don't think we need this
 			UserClass newUser = null;
+			
+			
 			String userString="",userName = "", type="";
 			double startingBalance = 0.0;
 			type = getTypeInput();
 			userString += type + ",";
+			
+			// Don't think we need this
 			newUser = TypeOfFactoryGenerator.getFactory("USER").getUser("CUSTOMER");
 			
 			int lastUserID = databaseFetcher.getHighestUserID();
@@ -318,7 +408,7 @@ public class UserInterfaceMenu {
 					JOptionPane.showMessageDialog(null, "Username Field empty", "Error", JOptionPane.ERROR_MESSAGE);
 					
 				}
-				if(databaseFetcher.getUserByName(userName) != null)
+				else if(databaseFetcher.getUserByName(userName) != null)
 				{
 					JOptionPane.showMessageDialog(null, "Username is already being used", "Error", JOptionPane.ERROR_MESSAGE);
 				}
@@ -370,15 +460,17 @@ public class UserInterfaceMenu {
 			public String UserToUpdate()
 			{
 				String updateString="";
-				String type = null, userName = null, name = null, password = null, email = null, phoneNumber = null;
-				boolean validUser=false;
+				String type = null, userName = null, name = null, password = null, email = null, phoneNumber = null, address = null;
+				boolean validUser=false, isCustomer=false;
 				while(!validUser)
 				{
 					String userToUpdateUserName = getUserToModify_UsernameInput();
-					
-					if(databaseFetcher.getUserByName(userToUpdateUserName) != null)
+					UserClass userToUpdate = databaseFetcher.getUserByName(userToUpdateUserName);
+					if(userToUpdate != null)
 					{
 						validUser=true;
+						if(userToUpdate.getType().equalsIgnoreCase("CUSTOMER"))
+							isCustomer = true;
 						updateString += userToUpdateUserName + ",";
 					}
 					else
@@ -386,7 +478,7 @@ public class UserInterfaceMenu {
 				}
 				
 				
-				String pieceToUpdate = showUserModificationMenu();
+				String pieceToUpdate = showUserModificationMenu(isCustomer);
 				if(pieceToUpdate.matches("User type"))
 				{
 					type = getTypeInput();
@@ -423,6 +515,14 @@ public class UserInterfaceMenu {
 					phoneNumber = getPhoneNumberInput();
 					updateString += "PhoneNumber," + phoneNumber;
 				}
+				
+				else if(pieceToUpdate.matches("Address"))
+				{
+					address = getAddressInput();
+					updateString += "Address," + address;
+				}
+				
+				
 				
 				// One piece of info can be changed at once, so the update string consists of 3 comma seperated values :
 				// 1)The username of the user that is being updated
@@ -583,8 +683,14 @@ public class UserInterfaceMenu {
 		return (String) JOptionPane.showInputDialog(null, "What action would you like to perform?","Supplier : " + currentUser.getName(), 1 , null, selection, selection[0]);
 	}
 	
-	public String showUserModificationMenu() {
-		Object [] selection = {"User type", "Username", "Name", "Password", "Email", "Phone Number"};
+	public String showUserModificationMenu(boolean isCustomer) {
+		Object [] selection = null;
+		String[] userArr = {"User type", "Username", "Name", "Password", "Email", "Phone Number"};
+		String[] customerArr = {"User type", "Username", "Name", "Password", "Email", "Phone Number", "Address"};
+		if(isCustomer)
+			selection = customerArr;
+		else
+			selection = userArr;
 		return (String) JOptionPane.showInputDialog(null, "What do you want to modify?","Admin : " + currentUser.getName(), 1 , null, selection, selection[0]);
 	}
 	

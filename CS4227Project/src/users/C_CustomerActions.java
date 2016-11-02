@@ -11,11 +11,11 @@ public class C_CustomerActions implements I_UserActions
 	{
 		if(dropdownSelection.equals("Browse Film List"))
 		{
-
+			
 		}
-		else if(dropdownSelection.equals("Search For Film"))
+		else if(dropdownSelection.equals("Search for Media Item"))
 		{
-
+			buy(returnedString);
 		}
 		else if(dropdownSelection.equals("Search By Category"))
 		{
@@ -39,10 +39,22 @@ public class C_CustomerActions implements I_UserActions
 
 	}
 	
-	//John
-	public static void buy(String username_FilmName) throws IOException
+	
+	public static void buy(String username_MediaName_confirm) throws IOException
 	{
-
+		String[] returnedStrArr = username_MediaName_confirm.split(",");
+		String username = returnedStrArr[0];
+		String MediaName = returnedStrArr[1];
+		UserClass customer= database.getUserByName(username);
+		CustomerClass cust= (CustomerClass)customer;
+		media.MediaItem item= database.getMediaItemByName(MediaName);
+		double oldBalance= Double.parseDouble(cust.getBalance());
+		double price= item.getPrice();
+		double newBalance= oldBalance-price;
+		String updatedBalance= Double.toString(newBalance);
+		cust.setBalance(updatedBalance);
+		database.updateUsers();
+		
 	}
 	
 	//John

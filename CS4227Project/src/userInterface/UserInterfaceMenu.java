@@ -345,12 +345,14 @@ public class UserInterfaceMenu {
 									returnString += choice3;
 									if(choice3.equals("Confirm Purchase"))
 									{
+										userMenu.userActions(returnedSelection, returnString);
 										displayReceipt(media);
+										
 									}
 									//returnedSelection is the result of the first dropdown : "Search For Film"
 									//returnString contains 3 comma separated values : currentUsers username, name of film,
 									//and the choice of whether they want to buy or rent it
-									userMenu.userActions(returnedSelection, returnString);
+									
 								}
 							}
 						}
@@ -644,21 +646,22 @@ public class UserInterfaceMenu {
 					{
 						k -= 5;
 					}
-					/* else  (temporarily commented out)
+					 else  
 					{
 						stillSearching=false;
 						boolean filmFound=false;
 						for(int i = 0; i < mediaList.size() && !filmFound; i++)
 						{
-							if(selectedFilm.equals(mediaList.get(i).getTitle()))
+							if(selectedFilm.equals(mediaList.get(i).getMediaType()+" - " + mediaList.get(i).getTitle()))
 							{
 								filmFound = true;
-								return mediaList.getTitle(i);
+							//	return mediaList.getTitle(i);
+								customerMediaItemDetailsAndReturnedChoice(mediaList.get(i));
 							}
 						}
-					} */
+					} 
 				}
-				return;
+				
 			}
 			
 			

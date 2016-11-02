@@ -22,7 +22,7 @@ public class CustomerClass extends UserClass
 		return balance;
 	}
 
-	public void setBalance(String balance) {
+	public void setBalance(String balance) throws IOException {
 		this.balance = balance;
 	}
 	

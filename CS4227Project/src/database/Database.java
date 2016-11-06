@@ -236,7 +236,7 @@ UserFactory userFactory = new UserFactory();
 			linesFromUsersFile.add(userToAdd.toString());
 			if(userToAdd.getType().equalsIgnoreCase("CUSTOMER"))
 			{
-				linesFromCustomerRepositoryFile.add(userToAdd.getUserID() + ",");
+				linesFromCustomerRepositoryFile.add(Integer.toString(userToAdd.getUserID()));
 				BufferedWriter bwUserAccess = new BufferedWriter(new FileWriter(customerRepositoryFile, false));						
 				for(int i=0; i<linesFromCustomerRepositoryFile.size(); i++)				
 				{
@@ -385,50 +385,77 @@ UserFactory userFactory = new UserFactory();
 				   return customersMediaItems;
 			   }
 		   }
-		   
-		   
-		   		   
 		   return null;
-		    
+	   }
+	   
+	   public boolean updateOnlineMediaRepository(String userID, String mediaID) throws IOException
+	   {
+		   boolean found = false, duplicate = false;
+		   for(int i=0; i<linesFromCustomerRepositoryFile.size() && !found; i++)
+		   {
+			   String currentLine = linesFromCustomerRepositoryFile.get(i);
+			   if(currentLine.startsWith(userID))
+			   {
+				   found = true;
+				   if(currentLine.contains(mediaID))
+				   {
+					   duplicate = true;
+				   }
+				   else
+				   {
+					   currentLine += "," + mediaID;
+					   linesFromCustomerRepositoryFile.set(i, currentLine);
+					   duplicate=false;
+					   
+					   // update text file after we add mediaID to the end of the line
+					   fw = new FileWriter(customerRepositoryFile, false);
+					   bw = new BufferedWriter(fw);
+					   for(int x=0; x<linesFromCustomerRepositoryFile.size(); x++)
+					   {
+						   bw.write(linesFromCustomerRepositoryFile.get(x));
+						   bw.newLine();
+					   }
+					   bw.close();
+					   fw.close();
+				   }
+			   }
+		   }
+		   return duplicate;
 	   }
 
 
+	   public void updateShoppingCart(String id, String qty, int UserID) throws Exception 
+	   {
+		   String aLineFromFile;
+		   String newLine;
 
+		   if(!linesFromShoppingCartFile.isEmpty()){
+			   linesFromShoppingCartFile.clear();
+		   }
+		   in = new Scanner(shoppingCartFile);
+		   while (in.hasNext()) {
+			   aLineFromFile = in.nextLine();
+			   String[]components = aLineFromFile.split(",");
+			   if (components[0].equals(Integer.toString(UserID))) {
+				   aLineFromFile = components[0];
+				   for(int j=1; j < components.length; j+=2){
+					   if(components[j].matches(id)){
+						   components[j+1] = qty;
+					   }
+					   aLineFromFile += "," + components[j] + "," + components[j+1];
+				   }
+			   }
+			   linesFromShoppingCartFile.add(aLineFromFile);
+		   }
 
-public void updateShoppingCart(String id, String qty, int UserID) throws Exception {
-	String aLineFromFile;
-	String newLine;
-	
-	if(!linesFromShoppingCartFile.isEmpty()){
-		linesFromShoppingCartFile.clear();
-	}
-	in = new Scanner(shoppingCartFile);
-		while (in.hasNext()) {
-			aLineFromFile = in.nextLine();
-			String[]components = aLineFromFile.split(",");
-		    if (components[0].equals(Integer.toString(UserID))) {
-		    	aLineFromFile = components[0];
-		        for(int j=1; j < components.length; j+=2){
-		        	if(components[j].matches(id)){
-		        		components[j+1] = qty;
-		        	}
-		        	aLineFromFile += "," + components[j] + "," + components[j+1];
-		        }
-		    }
-		    linesFromShoppingCartFile.add(aLineFromFile);
-		}
-	
-		System.out.println(linesFromShoppingCartFile);
-		BufferedWriter bwCart = new BufferedWriter(new FileWriter(shoppingCartFile, false));						
-		for(int i=0; i<linesFromShoppingCartFile.size(); i++)				
-		{
-			bwCart.write(linesFromShoppingCartFile.get(i));
-			bwCart.newLine();
-		}
-		bwCart.close();
-}
-
-
-
+		   System.out.println(linesFromShoppingCartFile);
+		   BufferedWriter bwCart = new BufferedWriter(new FileWriter(shoppingCartFile, false));						
+		   for(int i=0; i<linesFromShoppingCartFile.size(); i++)				
+		   {
+			   bwCart.write(linesFromShoppingCartFile.get(i));
+			   bwCart.newLine();
+		   }
+		   bwCart.close();
+	   }
 
 }

@@ -12,6 +12,7 @@ import payment.*;
 import media.MediaItem;
 import program.DatabaseFetcher;
 import program.TypeOfFactoryGenerator;
+import streaming.StreamMedia;
 import users.C_AdminActions;
 import users.C_CustomerActions;
 import users.I_UserActions;
@@ -151,30 +152,17 @@ public class UserInterfaceMenu {
 		String type = currentUser.getType();
 		
 		// then goes in to the correct functionality based on what type of user you are
-		if(type.matches("Admin"))
+		if(type.equalsIgnoreCase("Admin"))
 		{
 			while(stillLoggedIn)
 			{
 				// this shows the Admin dropdown menu and returns the selection from it
 				returnedMenuSelection = showAdminMenu();
 				
-				// userMenu is of reference type I_UserActions, which is the base class(An interface)
-				// new C_AdminActions(); calls the constructor of C_AdminActions(C is for control class) so that 
-				// userMenu.methodName() will call the methods in C_AdminActions
-				
-				// DONT NEED(I Think)!
-				userMenu = new C_AdminActions();
-				
-				
-				
 				if(returnedMenuSelection.equals("Add User"))
 				{
 					// calls the method to get the user input for a new user
 					String userToCreate = addNewUser();
-					
-					//calls the userActions method that is in C_AdminActions as userMenu was created with C_AdminActions as the
-					//concrete class
-					//userMenu.userActions(returnedMenuSelection, userToCreate);
 					
 					invoker.setCommand(new AF_AddNewUserCommand(new C_AdminActions()));
 					invoker.optionSelectedWithStringParam(userToCreate);
@@ -186,11 +174,6 @@ public class UserInterfaceMenu {
 					// calls the method to get the name of the user you want to delete
 					String userToRemove = UserToRemove();
 					
-					// calls the userActions method that is in C_AdminActions as userMenu was created with C_AdminActions as the
-					// concrete class
-					// userMenu.userActions(returnedMenuSelection, userToRemove);
-					
-					
 					invoker.setCommand(new AF_RemoveUserCommand(new C_AdminActions()));
 					invoker.optionSelectedWithStringParam(userToRemove);
 				}
@@ -200,10 +183,6 @@ public class UserInterfaceMenu {
 					//  calls the method to get the user to be updated, what part is being updated, and the new value
 					String updateUser = UserToUpdate();
 					
-					//calls the userActions method that is in C_AdminActions as userMenu was created with C_AdminActions as the
-					//concrete class
-					//userMenu.userActions(returnedMenuSelection, updateUser);
-					
 					invoker.setCommand(new AF_UpdateUserCommand(new C_AdminActions()));
 					invoker.optionSelectedWithStringParam(updateUser);
 				}
@@ -212,6 +191,121 @@ public class UserInterfaceMenu {
 					stillLoggedIn = false;
 				}
 			}
+		}
+		
+		if(type.equalsIgnoreCase("Customer"))
+		{
+			while(stillLoggedIn)
+			{
+				// this shows the Customer dropdown menu and returns the selection from it
+				returnedMenuSelection = showCustomerMenu();
+				
+				if(returnedMenuSelection.equalsIgnoreCase("Browse Media Catalogue"))
+				{
+					
+				}
+				
+				else if(returnedMenuSelection.equalsIgnoreCase("Search for Media Item"))
+				{
+					MediaItem media = searchforItem("MEGASTREAM");
+
+					// move purchasing code to a separate purchasingOptions(media) function that browse media can use too
+					// purchasingOpions(media) will return the info string that gets passed to invoker
+					
+					if(media!=null)
+					{
+						// infoString : username_mediaTitle_purchaseType_paymentOption
+						String infoString = currentUser.getUsername() + ",";
+						infoString += media.getTitle() + ",";
+						//String choice = customerMediaItemDetailsAndReturnedChoice(media);
+						String howToProceed = purchasingOptions(media);
+						
+						// new code
+						if(!howToProceed.equals("Cancel"))
+						{
+							if(howToProceed.equalsIgnoreCase("Buy Media Item"))
+							{
+								String purchaseType = purchaseType(media);
+								if(!purchaseType.equals("Cancel"))
+								{
+									infoString += purchaseType.substring(0, purchaseType.indexOf("-")-1) + ",";
+									
+									//TODO! take out this choice : don't use Credit card anymore
+									String paymentChoice = paymentMethod();
+									if(!paymentChoice.equals("Cancel"))
+									{
+										infoString += paymentChoice;
+										
+										invoker.setCommand(new CF_BuyMediaItemCommand(new Payment()));
+										invoker.optionSelectedWithStringParam(infoString);
+										displayReceipt(media);
+									}
+								}
+							}
+							
+							
+							else if(howToProceed.equalsIgnoreCase("Add To Cart"))
+							{
+								// TODO! invoker code here for add to cart functionality 
+								System.out.println("In search for media item : Add to Cart option");
+							}
+						}
+						
+						// new code
+					}
+				}
+				
+				else if(returnedMenuSelection.equalsIgnoreCase("View Shopping Cart"))
+				{
+					
+				}
+				
+				else if(returnedMenuSelection.equalsIgnoreCase("View Media Repository"))
+				{
+					//to be filled
+					//String returnString = currentUser.getUserID() + ",";
+					int userID = currentUser.getUserID();
+					String chosenMediaItemName = viewCustomersMediaRepository(userID);
+					if(!chosenMediaItemName.equals("Cancel"))
+					{	
+						invoker.setCommand(new CF_StreamMediaCommand(new StreamMedia()));
+						invoker.optionSelectedWithStringParam(chosenMediaItemName);
+					}
+				}
+				else if(returnedMenuSelection.equalsIgnoreCase("Add Funds to Wallet"))
+				{
+					String username= currentUser.getUsername();
+					String ammount= amountToAddToWallet();
+					
+					
+					if(ammount!= "Cancel")
+					{
+						String confirmation= confirmPurchase();
+						if(confirmation!= "Cancel")
+						{
+							String id_amount= username + "," + ammount;
+							invoker.setCommand(new CF_AddFundsToWalletCommand(new AddToWallet()));
+							invoker.optionSelectedWithStringParam(id_amount);
+						}
+					}
+					
+					
+				}
+				
+				else if(returnedMenuSelection.equalsIgnoreCase("View Profile"))
+				{
+					
+				}
+				else if(returnedMenuSelection.equals("Logout")){
+					//this will break the loop and log user out
+					stillLoggedIn = false;
+				}
+			}
+		}
+		
+		else if(type.equalsIgnoreCase("Staff"))
+		{
+			// staff menu here
 		}
 	}
 	
@@ -332,7 +426,7 @@ public class UserInterfaceMenu {
 						{
 							String returnString = currentUser.getUsername() + ",";
 							returnString+= media.getTitle() + ",";
-							String choice = customerMediaItemDetailsAndReturnedChoice(media);
+							String choice = purchasingOptions(media);
 							if(!choice.equals("Cancel")) 
 							{
 								String choice2 = paymentMethod();
@@ -656,7 +750,7 @@ public class UserInterfaceMenu {
 							{
 								filmFound = true;
 							//	return mediaList.getTitle(i);
-								customerMediaItemDetailsAndReturnedChoice(mediaList.get(i));
+								purchasingOptions(mediaList.get(i));
 							}
 						}
 					} 
@@ -677,7 +771,9 @@ public class UserInterfaceMenu {
 				}
 				fullListToDisplay[mediaItems.size()] = "Cancel";
 				String selection = (String) JOptionPane.showInputDialog(null, "Choose Media Item", "Customer : " + currentUser.getName(), 1 , null, fullListToDisplay, fullListToDisplay[0]);
-				return selection.substring(0, selection.indexOf("-")-1);
+				if(!selection.equals("Cancel"))
+					selection = selection.substring(0, selection.indexOf("-")-1);
+				return selection;
 			}
 
 			
@@ -693,7 +789,7 @@ public class UserInterfaceMenu {
 	
 	//new John
 	public String showCustomerMenu() {
-		Object [] selection = {"Browse Media List", "Search By Category","View Shopping Cart", "Search for Media Item", "View Media Repository", "Add Funds to Wallet", "Logout"};
+		Object [] selection = {"Browse Media Catalogue", "Search for Media Item", "View Shopping Cart", "View Media Repository", "Add Funds to Wallet", "View Profile", "Logout"};
 		return (String) JOptionPane.showInputDialog(null, "What action would you like to perform?","Customer : " + currentUser.getName(), 1 , null, selection, selection[0]);
 	}
 	
@@ -794,10 +890,28 @@ public class UserInterfaceMenu {
 		return item;
 	}
 	
-	public String customerMediaItemDetailsAndReturnedChoice(MediaItem media)
+	public String purchasingOptions(MediaItem media)
 	{
-		Object [] selection = {"Rent Film", "Buy Film", "Cancel"};
+		Object [] selection = {"Buy Media Item", "Add To Cart", "Cancel"};
 		return (String) JOptionPane.showInputDialog(null, media.toString(),"Customer : " + currentUser.getName(), 1 , null, selection, selection[0]);
+	}
+	
+//	public String customerMediaItemDetailsAndReturnedChoice(MediaItem media)
+//	{
+//		Object [] selection = {"Rent Film", "Buy Film", "Cancel"};
+//		return (String) JOptionPane.showInputDialog(null, media.toString(),"Customer : " + currentUser.getName(), 1 , null, selection, selection[0]);
+//	}
+	
+	public String purchaseType(MediaItem media)
+	{
+		Object[] selection;
+		String[] mediaItemSelection = {"Ship to Address - Hardcopy", "Store in Online Repository - SoftCopy", "Cancel"};
+		String[] gameSelection = {"Ship to Address - Hardcopy", "Cancel"};
+		if(media.getMediaType().equalsIgnoreCase("Game"))
+			selection = gameSelection;
+		else
+			selection = mediaItemSelection;
+		return (String) JOptionPane.showInputDialog(null, "What would you like to do?", "Customer : " + currentUser.getName(), 1 , null, selection, selection[0]);
 	}
 	
 	public String paymentMethod()
@@ -808,7 +922,7 @@ public class UserInterfaceMenu {
 	
 	public String confirmPurchase()
 	{
-		Object [] selection = {"Confirm Purchase", "Cancel", "Exit"};
+		Object [] selection = {"Confirm Purchase", "Cancel"};
 		return (String) JOptionPane.showInputDialog(null, "Please confirm purchase", "Customer : " + currentUser.getName(), 1 , null, selection, selection[0]);
 		
 	}
@@ -818,7 +932,6 @@ public class UserInterfaceMenu {
 		I_Receipt receipt= new ReceiptA();
 		receipt= new CustomerDecorator(receipt);
 		JOptionPane.showMessageDialog(null,receipt.PrintReceipt(media.getTitle()));
-		userActionMenu();
 	}
 	
 	public String amountToAddToWallet()
@@ -826,5 +939,13 @@ public class UserInterfaceMenu {
 		Object [] selection = {"€100", "€50", "€20", "€10", "Cancel"};
 		return (String) JOptionPane.showInputDialog(null, "Choose amount to add to wallet", "Customer : " + currentUser.getName(), 1 , null, selection, selection[0]);
 	}
+	
+	public void displayErrorMessage(String errorMessage)
+	{
+		JOptionPane.showMessageDialog(null, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
+	}
+	
+	
+	
 
 }

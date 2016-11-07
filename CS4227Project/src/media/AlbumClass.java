@@ -26,4 +26,5 @@ public class AlbumClass extends MediaItem {
 		
 	}
 
+
 }

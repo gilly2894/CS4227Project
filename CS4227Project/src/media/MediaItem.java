@@ -91,6 +91,23 @@ public abstract class MediaItem
 		this.rating = rating;
 	}
 	
+	public String toString() 
+	{
+		String returnString="";
+		returnString += getMediaType() + "," + getMediaID() + "," + getTitle() + "," + getCreator() + "," + getGenre()
+		+ "," + getType() + "," + getPrice() + "," + getDescription() + "," + getRating() + "," + getFormat();
+		return returnString;
+	}
+	
+	public String toFileString() {
+		
+		return getMediaType() + "," + getMediaID() + "," + getTitle() + "," + getCreator() + "," + getGenre()
+		+ "," + getType() + "," + getPrice() + "," + getDescription() + "," + getRating()
+		 + ","  + getFormat() ;
+		
+	}
+	
+	
 	
 	
 }

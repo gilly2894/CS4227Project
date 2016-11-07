@@ -15,12 +15,13 @@ UserFactory userFactory = new UserFactory();
 	private final String mediaItemsDatabase = "mediaItems.txt";
 	private final String customerRepository = "customerRepository.txt";
 	private final String shoppingCart = "shoppingCart.txt";
+	private final String supplierDatabase = "Supplier.txt";
 	
 	File usersFile = new File(usersDatabase);
 	File mediaItemsFile = new File(mediaItemsDatabase);
 	File customerRepositoryFile = new File(customerRepository);
 	File shoppingCartFile = new File (shoppingCart);
-	
+	File supplierFile = new File (supplierDatabase);
 	
 	// Reading and writing objects
 	FileWriter fw;
@@ -34,6 +35,7 @@ UserFactory userFactory = new UserFactory();
 	ArrayList<String> linesFromMediaItemsFile = new ArrayList<String>();
 	ArrayList<String> linesFromCustomerRepositoryFile = new ArrayList<String>();
 	ArrayList<String> linesFromShoppingCartFile = new ArrayList<String>();
+	ArrayList<String> linesFromSupplierFile = new ArrayList<String>();
 	
 	ArrayList<UserClass> usersList = new ArrayList<UserClass>();
 	ArrayList<MediaItem> mediaItemsCatalogueList = new ArrayList<MediaItem>();
@@ -51,7 +53,7 @@ UserFactory userFactory = new UserFactory();
 			populateMediaCatalogue();
 			populateCustomerRepository();
 			populateShoppingCartRepository();
-			
+			populateSupplierCatalogue();
 			//Need to add other methods in here so that the films lists will be updated and any other database too
 		}
 		
@@ -111,6 +113,25 @@ UserFactory userFactory = new UserFactory();
 			}
 			
 		}
+	    
+	    private void populateSupplierCatalogue() throws FileNotFoundException 
+	    {
+	    	in = new Scanner(supplierFile);
+			String aLineFromFile = "";
+			MediaItem mediaItem;
+			while(in.hasNext())
+			{
+				aLineFromFile = in.nextLine();
+				String type = aLineFromFile.substring(0, aLineFromFile.indexOf(","));
+				mediaItem = TypeOfFactoryGenerator.getFactory("MEDIA").getMediaItem(type);
+				if(mediaItem!=null)
+				{
+					linesFromSupplierFile.add(aLineFromFile);
+					mediaItemsSuppliersList.add(mediaItem.createMediaItem(aLineFromFile));
+				}
+			}
+			
+	    } 
 	    
 	    public void populateShoppingCartRepository() throws FileNotFoundException{
 	    	in = new Scanner(shoppingCartFile);
@@ -197,6 +218,26 @@ UserFactory userFactory = new UserFactory();
 				if(nameOfItem.matches(mediaItemsCatalogueList.get(i).getTitle()))
 				{
 					media= mediaItemsCatalogueList.get(i);
+					found= true;
+				}
+					
+			}
+			if(!found)
+			{
+				return null;
+			}
+			return media;
+		}
+		
+		public MediaItem getSupplierItemByName(String nameOfItem)
+		{	
+			MediaItem media=null;
+			boolean found=false;
+			for(int i=0;i<mediaItemsSuppliersList.size() && !found; i++)
+			{
+				if(nameOfItem.matches(mediaItemsSuppliersList.get(i).getTitle()))
+				{
+					media= mediaItemsSuppliersList.get(i);
 					found= true;
 				}
 					
@@ -346,7 +387,85 @@ UserFactory userFactory = new UserFactory();
 			fw.close();
 		}
 		
+		// Updates item and writes to DB
+		public void updateItem() throws IOException
+		{
+			linesFromMediaItemsFile.clear();
+			for(int i=0;i<mediaItemsCatalogueList.size();i++)
+			{
+				linesFromMediaItemsFile.add(mediaItemsCatalogueList.get(i).toFileString());
+			}
+			
+			fw = new FileWriter(mediaItemsFile, false);
+			bw = new BufferedWriter(fw);
+			for(int i=0; i<linesFromMediaItemsFile.size(); i++)
+			{
+				bw.write(linesFromMediaItemsFile.get(i));
+				bw.newLine();
+			}
+			bw.close();
+			fw.close();
+		}
 	    
+		public void removeItem(MediaItem itemToRemove) throws IOException
+		{
+			boolean found = false;
+			for(int i=0; i<mediaItemsCatalogueList.size() && !found; i++)
+			{
+				
+				if(itemToRemove.getTitle().equals(mediaItemsCatalogueList.get(i).getTitle()))
+				{
+					mediaItemsCatalogueList.remove(i);
+					linesFromMediaItemsFile.remove(i);
+					found=true;
+					
+				}
+			}
+
+				fw = new FileWriter(mediaItemsFile, false);
+				bw = new BufferedWriter(fw);
+				for(int i=0; i<linesFromMediaItemsFile.size(); i++)
+				{
+					bw.write(linesFromMediaItemsFile.get(i));
+					bw.newLine();
+				}
+				
+				bw.close();
+				fw.close();
+		}
+		
+		public void addItemFromSuppier(MediaItem media) throws IOException
+		{
+			boolean itemDuplicate = false;
+			in = new Scanner(mediaItemsFile);
+			String lineFromFile;
+			while(in.hasNext() && !itemDuplicate)
+			{
+				lineFromFile = in.nextLine();
+				String[] arr = lineFromFile.split(",");
+				if(media.getTitle().equals(arr[1]))
+				{
+					itemDuplicate = true;
+				}
+			}
+			if(!itemDuplicate)
+			{
+				linesFromMediaItemsFile.add(media.toFileString());
+				//I_MediaItem filmInstance = TypeOfFactoryGenerator.getFactory("MEDIA").getMediaItem("FILM");
+				//mediaItemsCatalogueList.add(filmInstance.createMediaItem(film.toString()));
+				fw = new FileWriter(mediaItemsFile, false);
+				bw = new BufferedWriter(fw);
+				for(int i=0; i<linesFromMediaItemsFile.size(); i++)
+				{
+					bw.write(linesFromMediaItemsFile.get(i));
+					bw.newLine();
+				}
+				bw.close();
+				fw.close();
+			}
+			
+		}
+		
 		
 		//	Media Section
 		
@@ -354,6 +473,11 @@ UserFactory userFactory = new UserFactory();
 		{
 			return mediaItemsCatalogueList;
 		}
+	    
+	    public ArrayList<MediaItem> getSupplierItems()
+	    {
+	    	return mediaItemsSuppliersList;
+	    }
 	    
 	   public MediaItem searchSuppliersDatabase(String nameOfItem)
 	   {
@@ -427,83 +551,4 @@ public void updateShoppingCart(String id, String qty, int UserID) throws Excepti
 		}
 		bwCart.close();
 }
-
-public void updateWallet(String userName, String newWallet) throws IOException
-{
-	String users = "users.txt";
-	String cvsSplitBy = ",";
-	String line = "";
-	
-	int arraylength = 0;
-	BufferedReader br = null;
-	try
-	{
-		br = new BufferedReader(new FileReader(users));
-		while ((line = br.readLine()) != null)
-		{
-			//String[] allData = line.split(cvsSplitBy);
-			arraylength ++;
-		}
-			
-		String fullarray [][] = new String[arraylength][7];
-		br = new BufferedReader(new FileReader(users));
-		int counter = 0;
-		while ((line = br.readLine()) != null)
-		{
-			String[] allData = line.split(cvsSplitBy);
-			for (int x = 0; x < 6; x++)
-			{
-				fullarray [counter][x] = allData[x];
-				if ((allData[0]).equals("Customer"))
-				{
-					fullarray [counter][6] = allData[6];
-				}
-				if ((allData[1]).equals(userName))
-				{
-					fullarray [counter][6] = String.valueOf(newWallet);
-				}
-			}
-			counter++;
-		}
-		//Write to file
-
-		FileWriter fileW = new FileWriter(users);
-		PrintWriter printW = new PrintWriter(fileW);
-		for (int i = 0; i < (arraylength); i++)
-		{
-			for (int j = 0; j < (7); j++)
-			{
-				if (fullarray [i][j] != null)
-					//System.out.print(fullarray [i][j] + ",");
-				printW.print(fullarray [i][j] + ",");
-			}
-			printW.print("\n");
-			//System.out.print("\n");
-		}
-		printW.close();
-		}
-		catch (FileNotFoundException e)
-		{
-			e.printStackTrace();
-		} 
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-		if (br != null)
-		{
-			try
-			{
-				br.close();
-			} 
-			catch (IOException e)
-			{
-				e.printStackTrace();
-			}
-		}
-	}
-}
-
 }

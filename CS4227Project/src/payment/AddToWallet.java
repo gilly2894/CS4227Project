@@ -27,7 +27,7 @@ public class AddToWallet {
 		double updateAmount = Double.parseDouble(updatedWallet);
 		double currentamount = (oldAmount + updateAmount);
 		String newWallet = Double.toString(currentamount);
-		database.updateWallet(userName, newWallet);
+		//database.updateWallet(userName, newWallet);
 		String message = ("New Wallet balance is €" + newWallet);
 		userInterface.UserInterfaceMenu execute = new UserInterfaceMenu();
 		execute.showNewWallet(message);

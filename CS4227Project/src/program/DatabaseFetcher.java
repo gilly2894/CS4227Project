@@ -25,7 +25,10 @@ public class DatabaseFetcher {
 		return database.getMediaItemByName(mediaName);
 	}
 	
-	
+	public MediaItem getSupplierItemByName(String mediaName)
+	{
+		return database.getSupplierItemByName(mediaName);
+	}
 	
 	public void addUser(UserClass currentUser) throws IOException
 	{
@@ -40,6 +43,11 @@ public class DatabaseFetcher {
 	public ArrayList<MediaItem> getMediaItems()
 	{
 		return database.getMediaItems();
+	}
+	
+	public ArrayList<MediaItem> getSupplierItems()
+	{
+		return database.getSupplierItems();
 	}
 	
 	public HashMap<MediaItem, String> getShoppingCart(String userID) throws FileNotFoundException

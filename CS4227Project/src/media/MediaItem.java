@@ -6,6 +6,7 @@ public abstract class MediaItem
 {
 	private String mediaType="", mediaID="", title="", creator="", genre="", releaseType="", description="", format="";
 	private double price = 0.0, rating = 0.0;
+	private PriceBundler bundler;
 	
 	public abstract void paymentMethod(String userID, String fileName, String filePrice, String paymentMethod, String confirmation) throws IOException;
 	public abstract void payWithWallet(String userID, String fileName, String filePrice) throws IOException;
@@ -30,6 +31,19 @@ public abstract class MediaItem
 	
 	//    getters and setters
 	
+	
+	
+	public PriceBundler getBundler() {
+		return bundler;
+	}
+	public void setBundler(PriceBundler bundler) {
+		this.bundler = bundler;
+	}
+	
+	public void bundle()
+	{
+		
+	}
 	public String getMediaType() {
 		return mediaType;
 	}

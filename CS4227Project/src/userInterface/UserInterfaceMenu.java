@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.swing.JOptionPane;
 import payment.*;
 import media.MediaItem;
+import media.PlatformChoice;
 import program.DatabaseFetcher;
 import program.TypeOfFactoryGenerator;
 import streaming.StreamMedia;
@@ -219,12 +220,30 @@ public class UserInterfaceMenu {
 						infoString += media.getTitle() + ",";
 						//String choice = customerMediaItemDetailsAndReturnedChoice(media);
 						String howToProceed = purchasingOptions(media);
+						String platformChoice= infoString;
 						
 						// new code
 						if(!howToProceed.equals("Cancel"))
 						{
+							
+								
 							if(howToProceed.equalsIgnoreCase("Buy Media Item"))
 							{
+								
+								boolean platform= false;
+								if(media.getMediaType().equalsIgnoreCase("GAME"))
+								{
+									String choice4= getChoicePlatform(media);
+									if(!choice4.equals("Cancel"))
+									{	
+										String returnChoice= infoString + choice4 + ","; 
+										platform=true;
+										invoker.setCommand(new CF_ChoosePlatformCommand(new PlatformChoice()));
+										invoker.optionSelectedWithStringParam(returnChoice);
+										
+										
+									}
+								}
 								String purchaseType = purchaseType(media);
 								if(!purchaseType.equals("Cancel"))
 								{
@@ -238,9 +257,15 @@ public class UserInterfaceMenu {
 										
 										invoker.setCommand(new CF_BuyMediaItemCommand(new Payment()));
 										invoker.optionSelectedWithStringParam(infoString);
-										displayReceipt(media);
+										
 									}
 								}
+//								if(platform=true)
+//								{
+//									platformChoice+="NULLPLATFORM";
+//									invoker.setCommand(new CF_ChoosePlatformCommand(new PlatformChoice()));
+//									invoker.optionSelectedWithStringParam(platformChoice);
+//								}
 							}
 							
 							
@@ -427,11 +452,25 @@ public class UserInterfaceMenu {
 							String returnString = currentUser.getUsername() + ",";
 							returnString+= media.getTitle() + ",";
 							String choice = purchasingOptions(media);
+							String platformChoice= returnString;
 							if(!choice.equals("Cancel")) 
 							{
+								boolean platform= false;
+								if(choice.equals("Choose Platform"))
+								{
+									String choice4= getChoicePlatform(media);
+									if(!choice4.equals("Cancel"))
+									{	
+										String returnChoice= returnString + choice4 + ","; 
+										platform=true;
+										userMenu.userActions("Choose Platform", returnChoice);
+										
+									}
+								}
 								String choice2 = paymentMethod();
 								if(!choice2.equals("Cancel"))
-								{	
+								{
+									
 									String choice3 = confirmPurchase();
 									returnString += (choice + ",");
 									returnString += (choice2 + ",");
@@ -441,6 +480,12 @@ public class UserInterfaceMenu {
 									{
 										userMenu.userActions(returnedSelection, returnString);
 										displayReceipt(media);
+										if(platform=true)
+										{
+											platformChoice+= "NULLPLATFORM";
+											userMenu.userActions("Choose Platform", platformChoice);
+											platform=false;
+										}
 										
 									}
 									//returnedSelection is the result of the first dropdown : "Search For Film"
@@ -948,4 +993,18 @@ public class UserInterfaceMenu {
 	
 	
 
+	public String getChoicePlatform(MediaItem media)
+	{
+		Object[] formats = media.getFormat().split(":");
+		
+		Object[] formatz= new Object[formats.length+1];
+		for(int i=0; i<formats.length; i++)
+		{
+			formatz[i]=formats[i];
+		}
+		formatz[formatz.length-1]= "Cancel";
+		
+		return (String) JOptionPane.showInputDialog(null, "Choose Platform", "Customer : " + currentUser.getName(), 1 , null, formatz, formatz[0]);
+	}
+	
 }

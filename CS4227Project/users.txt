@@ -1,4 +1,4 @@
-Customer,1000,username,password,Shaun Gilbert,shaun@gilbert.com,0862342445,210.0,123 Street Name
+Customer,1000,username,password,Shaun Gilbert,shaun@gilbert.com,0862342445,32.724999999999994,123 Street Name
 Customer,1001,customer,customer,Denis Holmes,denis@holmes.com,0878773261,2.00,126 Street Name
 Staff,1002,staff,staff,Ray Lee,ray@lee.com,0874472288
 Admin,1003,admin,admin,Joel Hartney,joel@hartney.com,0837752615

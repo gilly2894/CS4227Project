@@ -3,7 +3,9 @@ package payment;
 import java.io.IOException;
 
 import database.Database;
+import media.GameClass;
 import media.MediaItem;
+import media.PlatformChoice;
 import userInterface.UserInterfaceMenu;
 import users.CustomerClass;
 import users.UserClass;
@@ -32,6 +34,7 @@ public class Payment {
 		if(newBalance>=0.0)
 		{
 			// ENOUGH MONEY!
+		
 			
 			if(purchaseType.equalsIgnoreCase("Store in Online Repository"))
 			{
@@ -48,11 +51,18 @@ public class Payment {
 				}
 			}
 			
+			
 			// MAKES PAYMENT : UPDATES CUSTOMER BALANCE
 			String updatedBalance= Double.toString(newBalance);
 			cust.setBalance(updatedBalance);
 			
-			// THIS UPDATES USERS.TXT WITH THE NEW BALANCE FOR CUSTOMER
+			I_Receipt receipt= new ReceiptA();
+			receipt= new CustomerDecorator(receipt);
+			userInterface.UserInterfaceMenu execut = new UserInterfaceMenu();
+			execut.displayReceipt(item);
+		
+				
+				// THIS UPDATES USERS.TXT WITH THE NEW BALANCE FOR CUSTOMER
 			database.updateUsers();
 		}
 		else
@@ -60,8 +70,13 @@ public class Payment {
 			String message = ("Payment Cancelled : Insufficient Funds!");
 			userInterface.UserInterfaceMenu execute = new UserInterfaceMenu();
 			execute.displayErrorMessage(message);
-			return;
 		}
 		
+		if(item.getMediaType().equalsIgnoreCase("GAME"))
+		{
+			GameClass itemG= (GameClass)item;
+			PlatformChoice pChoice= new PlatformChoice();
+			pChoice.nullPLatform(itemG);
+		}
 	}
 }

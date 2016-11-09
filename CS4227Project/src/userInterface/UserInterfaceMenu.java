@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.swing.JOptionPane;
 import payment.*;
+import media.GameClass;
 import media.MediaItem;
 import media.PlatformChoice;
 import program.DatabaseFetcher;
@@ -204,7 +205,7 @@ public class UserInterfaceMenu {
 				
 				if(returnedMenuSelection.equalsIgnoreCase("Browse Media Catalogue"))
 				{
-					
+					browseMediaList();
 				}
 				
 				else if(returnedMenuSelection.equalsIgnoreCase("Search for Media Item"))
@@ -220,8 +221,8 @@ public class UserInterfaceMenu {
 						String infoString = currentUser.getUsername() + ",";
 						infoString += media.getTitle() + ",";
 						//String choice = customerMediaItemDetailsAndReturnedChoice(media);
-						String howToProceed = purchasingOptions(media);
-						String platformChoice= infoString;
+						/*String howToProceed =*/ purchasingOptions(media);
+	/*					String platformChoice= infoString;
 						
 						// new code
 						if(!howToProceed.equals("Cancel"))
@@ -276,7 +277,7 @@ public class UserInterfaceMenu {
 								System.out.println("In search for media item : Add to Cart option");
 							}
 						}
-						
+						*/
 						// new code
 					}
 				}
@@ -560,8 +561,10 @@ public class UserInterfaceMenu {
 						{
 							String returnString = currentUser.getUsername() + ",";
 							returnString+= media.getTitle() + ",";
-							String choice = purchasingOptions(media);
-							String platformChoice= returnString;
+							/*String choice =*/ purchasingOptions(media);
+						}
+					}
+	/*						String platformChoice= returnString;
 							if(!choice.equals("Cancel")) 
 							{
 								boolean platform= false;
@@ -604,7 +607,7 @@ public class UserInterfaceMenu {
 								}
 							}
 						}
-					}
+					} */
 					
 					else if(returnedSelection.equals("View Media Repository"))
 					{
@@ -1418,10 +1421,60 @@ public class UserInterfaceMenu {
 		return item;
 	}
 	
-	public String purchasingOptions(MediaItem media)
+	public void purchasingOptions(MediaItem media)
 	{
+		String infoString = currentUser.getUsername() + ",";
+		infoString += media.getTitle() + ",";
 		Object [] selection = {"Buy Media Item", "Add To Cart", "Cancel"};
-		return (String) JOptionPane.showInputDialog(null, media.toString(),"Customer : " + currentUser.getName(), 1 , null, selection, selection[0]);
+		String opt= (String) JOptionPane.showInputDialog(null, media.toString(),"Customer : " + currentUser.getName(), 1 , null, selection, selection[0]);
+	
+		if(opt.equalsIgnoreCase("Buy Media Item"))
+		{	
+			if(media.getMediaType().equalsIgnoreCase("GAME"))
+			{
+			/*	String choice4= */getChoicePlatform(media);
+		/*		if(!choice4.equals("Cancel"))
+				{	
+					String returnChoice= infoString + choice4 + ","; 
+					platform=true;
+					invoker.setCommand(new CF_ChoosePlatformCommand(new PlatformChoice()));
+					invoker.optionSelectedWithStringParam(returnChoice);
+				}*/	
+			}
+			String purchaseType = purchaseType(media);
+			if(!purchaseType.equals("Cancel"))
+			{
+				infoString += purchaseType.substring(0, purchaseType.indexOf("-")-1) + ",";
+			
+				//TODO! take out this choice : don't use Credit card anymore
+				String paymentChoice = paymentMethod();
+				if(!paymentChoice.equals("Cancel"))
+				{
+					infoString += paymentChoice;
+				
+					invoker.setCommand(new CF_BuyMediaItemCommand(new Payment()));
+					invoker.optionSelectedWithStringParam(infoString);
+				
+				}
+			}
+		}
+		else if(opt.equalsIgnoreCase("Add To Cart"))
+		{
+			boolean platform=false;
+			// TODO! invoker code here for add to cart functionality 
+			if(media.getMediaType().equalsIgnoreCase("GAME"))
+			{
+				getChoicePlatform(media);
+				platform= true;
+			}
+			System.out.println("In search for media item : Add to Cart option");
+			if(platform==true)
+			{
+				GameClass item= (GameClass)media;
+				PlatformChoice pChoice= new PlatformChoice();
+				pChoice.nullPLatform(item);
+			}
+		}
 	}
 	
 //	public String customerMediaItemDetailsAndReturnedChoice(MediaItem media)
@@ -1494,8 +1547,11 @@ public class UserInterfaceMenu {
 	
 	
 
-	public String getChoicePlatform(MediaItem media)
+	public void getChoicePlatform(MediaItem media)
 	{
+		String infoString = currentUser.getUsername() + ",";
+		infoString += media.getTitle() + ",";
+		boolean platform=false;
 		Object[] formats = media.getFormat().split(":");
 		
 		Object[] formatz= new Object[formats.length+1];
@@ -1505,7 +1561,16 @@ public class UserInterfaceMenu {
 		}
 		formatz[formatz.length-1]= "Cancel";
 		
-		return (String) JOptionPane.showInputDialog(null, "Choose Platform", "Customer : " + currentUser.getName(), 1 , null, formatz, formatz[0]);
+		String choice4= (String) JOptionPane.showInputDialog(null, "Choose Platform", "Customer : " + currentUser.getName(), 1 , null, formatz, formatz[0]);
+		if(!choice4.equals("Cancel"))
+		{	
+			String returnChoice= infoString + choice4 + ","; 
+			platform=true;
+			invoker.setCommand(new CF_ChoosePlatformCommand(new PlatformChoice()));
+			invoker.optionSelectedWithStringParam(returnChoice);
+			
+			
+		}
 	}
 	
 }

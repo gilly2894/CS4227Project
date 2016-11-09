@@ -3,6 +3,8 @@ package payment;
 import java.io.IOException;
 
 import database.Database;
+import interceptor.contextObjects.PaymentInfoContext;
+import interceptor.dispatchers.ClientRequestDispatcher;
 import media.GameClass;
 import media.MediaItem;
 import media.PlatformChoice;
@@ -44,9 +46,10 @@ public class Payment {
 				// ERROR & PAYMENT CANCELLED IF ALREADY IN REPOSITORY
 				if(alreadyInRepository)
 				{				
-					String message = ("Payment Cancelled!\n" + item.getTitle() + " is already in your online repository!");
+					String message = ("Payment Cancelled! " + item.getTitle() + " is already in online repository!");
 					userInterface.UserInterfaceMenu execute = new UserInterfaceMenu();
 					execute.displayErrorMessage(message);
+					logPaymentSuccessOrFailure(Integer.toString(userID), message, false);
 					return;
 				}
 			}
@@ -55,7 +58,8 @@ public class Payment {
 			// MAKES PAYMENT : UPDATES CUSTOMER BALANCE
 			String updatedBalance= Double.toString(newBalance);
 			cust.setBalance(updatedBalance);
-			
+			String message = "Successful payment : Paid: " + price + " for " + mediaTitle;
+			logPaymentSuccessOrFailure(Integer.toString(userID), message, true);
 			I_Receipt receipt= new ReceiptA();
 			receipt= new CustomerDecorator(receipt);
 			userInterface.UserInterfaceMenu execut = new UserInterfaceMenu();
@@ -67,9 +71,11 @@ public class Payment {
 		}
 		else
 		{
-			String message = ("Payment Cancelled : Insufficient Funds!");
+			String message = ("Payment Cancelled! : Insufficient Funds!");
 			userInterface.UserInterfaceMenu execute = new UserInterfaceMenu();
 			execute.displayErrorMessage(message);
+			logPaymentSuccessOrFailure(Integer.toString(userID), message, false);
+			return;
 		}
 		
 		if(item.getMediaType().equalsIgnoreCase("GAME"))
@@ -78,5 +84,10 @@ public class Payment {
 			PlatformChoice pChoice= new PlatformChoice();
 			pChoice.nullPLatform(itemG);
 		}
+	}
+	
+	public void logPaymentSuccessOrFailure(String userID, String description, boolean isSuccessful) throws IOException
+	{
+		ClientRequestDispatcher.getInstance().dispatchClientRequestInterceptorPaymentLogging(new PaymentInfoContext(userID, description, isSuccessful));
 	}
 }

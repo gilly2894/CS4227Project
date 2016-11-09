@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import media.FilmClass;
 import media.MediaItem;
+import program.TypeOfFactoryGenerator;
 
 public class C_StaffActions implements I_UserActions {
 
@@ -50,4 +51,28 @@ public class C_StaffActions implements I_UserActions {
 		MediaItem itemAdding = database.getSupplierItemByName(arr[1]);
 		database.addItemFromSuppier(itemAdding);
 	}
+	
+	public void updateItemFromMemento(String oldStateFromMemento) throws IOException
+	{
+		// oldStateFromMemento will be the line from the database
+		String[] arr = oldStateFromMemento.split(",");
+		MediaItem itemToUpdateWithMemento = database.getMediaItemByID(arr[1]);
+		
+		if(itemToUpdateWithMemento == null)
+		{
+			MediaItem mementoItem = TypeOfFactoryGenerator.getFactory("MEDIA").getMediaItem(oldStateFromMemento);
+			database.addItemFromSuppier(mementoItem);
+		}
+		else
+		{
+			
+			itemToUpdateWithMemento.setReleaseType(arr[5]);
+			itemToUpdateWithMemento.setPrice(Double.parseDouble(arr[6]));
+			itemToUpdateWithMemento.setRating(Double.parseDouble(arr[8]));
+			
+			database.updateItem();
+		}
+		
+	}
 }
+

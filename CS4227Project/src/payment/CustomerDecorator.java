@@ -8,15 +8,9 @@ public class CustomerDecorator extends ReceiptDecorator {
 	
 	public String PrintReceipt(String media)
 	{
-		String customerGreeting= "Thank you for shopping with us. You're a delightful customer.";
+		String customerGreeting= "Thank you for shopping with us. You're a delightful customer.\n";
+		return customerGreeting + decoratedReceipt.PrintReceipt(media);
 		
-		
-		
-		
-		
-		
-		String total= customerGreeting + decoratedReceipt.PrintReceipt(media);
-		return total;
 	}
 
 }

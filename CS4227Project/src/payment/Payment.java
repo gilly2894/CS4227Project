@@ -23,6 +23,7 @@ public class Payment {
 		String mediaTitle = arr[1];
 		String purchaseType = arr[2];
 		String paymentOption = arr[3];
+		I_Receipt receipt= new ReceiptA();
 		
 		UserClass customer= database.getUserByName(username);
 		int userID = customer.getUserID();
@@ -31,7 +32,8 @@ public class Payment {
 		double oldBalance= Double.parseDouble(cust.getBalance());
 		double price= item.getPrice();
 		double newBalance= oldBalance-price;
-		if(newBalance>=0.0)
+			
+		if((newBalance>=0.0 && paymentOption.equalsIgnoreCase("Wallet")) || paymentOption.equalsIgnoreCase("Credit Card") )
 		{
 			// ENOUGH MONEY!
 		
@@ -49,17 +51,30 @@ public class Payment {
 					execute.displayErrorMessage(message);
 					return;
 				}
+				receipt= new CustomerDecorator(new OnlineDecorator(receipt));
+				
 			}
 			
+			else if(purchaseType.equalsIgnoreCase("Ship to Address"))
+			{
+				receipt= new CustomerDecorator(new ShipmentDecorator(receipt));
+			}
 			
+			if(paymentOption.equalsIgnoreCase("Wallet"))
+			{	
 			// MAKES PAYMENT : UPDATES CUSTOMER BALANCE
-			String updatedBalance= Double.toString(newBalance);
-			cust.setBalance(updatedBalance);
+				String updatedBalance= Double.toString(newBalance);
+				cust.setBalance(updatedBalance);
+				receipt= new WalletDecorator(receipt);
+			}
 			
-			I_Receipt receipt= new ReceiptA();
-			receipt= new CustomerDecorator(receipt);
+			if(paymentOption.equalsIgnoreCase("Credit Card"))
+			{	
+				receipt= new CreditCardDecorator(receipt);
+			}
+			
 			userInterface.UserInterfaceMenu execut = new UserInterfaceMenu();
-			execut.displayReceipt(item);
+			execut.displayReceipt(item,receipt);
 		
 				
 				// THIS UPDATES USERS.TXT WITH THE NEW BALANCE FOR CUSTOMER

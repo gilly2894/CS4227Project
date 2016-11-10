@@ -7,8 +7,8 @@ public class ReceiptA implements I_Receipt {
 	@Override
 	public String PrintReceipt(String media) {
 		
-		String basicText = "You paid €" + database.getMediaItemByName(media).getPrice() + " for " + media;
-		return basicText;
+		return "You paid €" + database.getMediaItemByName(media).getPrice() + " for " + media + "\n";
+		
 	}
 
 	

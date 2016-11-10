@@ -8,7 +8,7 @@ public class StaffDecorator extends ReceiptDecorator {
 	
 	public String PrintReceipt(String media)
 	{
-		String staffGreeting= "You've successfully ordered such items to be supplied to you.";
+		String staffGreeting= "You've successfully ordered such items to be supplied to you.\n";
 		
 		String total= staffGreeting + decoratedReceipt.PrintReceipt(media);
 		return total;

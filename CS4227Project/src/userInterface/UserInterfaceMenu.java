@@ -1476,10 +1476,8 @@ public class UserInterfaceMenu {
 		
 	}
 	
-	public void displayReceipt(MediaItem media) throws IOException
+	public void displayReceipt(MediaItem media,I_Receipt receipt) throws IOException
 	{
-		I_Receipt receipt= new ReceiptA();
-		receipt= new CustomerDecorator(receipt);
 		JOptionPane.showMessageDialog(null,receipt.PrintReceipt(media.getTitle()));
 	}
 	

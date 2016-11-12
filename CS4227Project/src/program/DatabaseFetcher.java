@@ -9,6 +9,7 @@ import java.util.Scanner;
 import database.Database;
 import media.FilmClass;
 import media.MediaItem;
+import media.ShoppingCart;
 import users.UserClass;
 
 public class DatabaseFetcher {
@@ -90,14 +91,33 @@ public class DatabaseFetcher {
 		return database.getCustomersMediaRepository(userID);
 	}
 	
-	public void updateShoppingCart(String id, String qty, int userID){
+	public void updateShoppingCartFile(String cartID, String itemID, String qty){
 		try {
-			database.updateShoppingCart(id,qty, userID);
+			database.updateShoppingCartFile(cartID ,itemID, qty);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public void clearUsersCart(String userID) throws IOException {
+		database.clearUsersCart(userID);
+		
+	}
+	
+	public void removeMediaFromCartFile(MediaItem m, String userID) throws IOException {
+		database.removeMediaFromCartFile(m, userID);
+	}
+	
+	public ShoppingCart initializeUsersShoppingCart(int userID) throws FileNotFoundException {
+		return database.initializeUsersShoppingCart(Integer.toString(userID)); 	
+	}
+	
+	
+	
+	
+	public void updateOnlineRepository(String userID, HashMap<MediaItem, String> cartList) throws IOException {
+		database.addToRepository(userID,cartList);
 	}
 
 }

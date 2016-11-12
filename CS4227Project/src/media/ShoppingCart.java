@@ -1,28 +1,60 @@
 package media;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
-public class ShoppingCart {
+import javax.swing.JOptionPane;
+
+import media.MediaItem;
+
+public class ShoppingCart implements I_Observer{
+
 	private String cartID;
-	private ArrayList<MediaItem> cartMap;
-	private int totalCost;
+	HashMap <MediaItem, String> cartList;
+	private double totalCost;
+	private static boolean priceChangeInCart = false;
 
-	public ShoppingCart(String cartID){
-		this.cartID = cartID;
-		cartMap = new ArrayList<MediaItem>();
+	public ShoppingCart(){
+		setCartID("");
+		cartList = new HashMap<MediaItem, String>();
+		totalCost = 0;
 	}
 	
-	public void addItem(MediaItem m) {
-		cartMap.add(m);
+	public ShoppingCart(String userID, HashMap <MediaItem, String> cartList)
+	{
+		this.setCartID(userID);
+		this.cartList = cartList;
+		calculateTotalCost();
+		for (Map.Entry<MediaItem, String> entry : cartList.entrySet()) {
+			entry.getKey().registerObserver(this);
+		}
+	}
+	
+	public void addItem(MediaItem m, String quantity) {
+		cartList.put(m,quantity);
+		m.registerObserver(this);
+		calculateTotalCost();
+	}
+	
+	public void clearCart() {
+		cartList.clear();
+		
 	}
 
 	public void removeItem(MediaItem m) {
-		int i = cartMap.indexOf(m);
-		cartMap.remove(i);
+		cartList.remove(m);
+		m.removeObserver(this);
+		calculateTotalCost();
 	}
 
-	public void updateQuantity() {
-
+	public void updateQuantity(MediaItem m, String quantity) {
+		for (Map.Entry<MediaItem, String> entry : cartList.entrySet()) {
+			if(entry.getKey().equals(m)){
+				cartList.put(m, quantity);
+			}
+		}
+		calculateTotalCost();
 	}
 
 	public void viewCartDetails() {
@@ -33,8 +65,85 @@ public class ShoppingCart {
 
 	}
 
-	public void getTotalCost() {
-
+	public String getCartID() {
+		return cartID;
 	}
 
+	public void setCartID(String cartID) {
+		this.cartID = cartID;
+	}
+	
+	public HashMap <MediaItem, String> getCartList() {
+		return cartList;
+	}
+
+	public void update(MediaItem mediaItem) {
+		 for(Map.Entry<MediaItem, String> entry : cartList.entrySet())
+			{
+			 
+				if(entry.getKey().getMediaID().equals(mediaItem.getMediaID()))
+				{
+					calculateTotalCost();
+					//Bellow will have to be sent to UI to display
+				JOptionPane.showMessageDialog(null, "The price of " + mediaItem.getTitle() + " has changed to " + mediaItem.getPrice()
+														+ "\nTotal Cost : " + getTotalCost());
+				}
+					
+			}
+	}
+
+	
+	
+
+	public double getTotalCost() {
+		return totalCost;
+	}
+	public void setTotalCost(double totalCost) {
+		this.totalCost = totalCost;
+	}
+	
+
+	public boolean checkIfItemExists(MediaItem m) {
+		for(Map.Entry<MediaItem, String> entry : cartList.entrySet()){
+			if(entry.getKey().getMediaID().equals(m.getMediaID()))
+				return true;
+		}
+		return false;
+	}
+	
+	public void calculateTotalCost()
+	{
+		//loop through cart and add cost of each (item*quantity)
+		totalCost = 0.0;
+		for(Map.Entry<MediaItem, String> entry : cartList.entrySet())
+		{
+		 
+			totalCost += entry.getKey().getPrice() * Integer.parseInt(entry.getValue());
+		}
+		setTotalCost(totalCost);
+	}
+
+	public String getQuantity(MediaItem shoppingItem) {
+		for(Map.Entry<MediaItem, String> entry : cartList.entrySet())
+		{
+			if(entry.getKey().getMediaID().equals(shoppingItem.getMediaID()))
+					return entry.getValue();
+		}
+		JOptionPane.showMessageDialog(null, "Cannot find quantity!", "Quantity Error",JOptionPane.ERROR_MESSAGE);
+		return null;
+	}
+
+	public String getSingleQuantityPrice() {
+		double newPrice = 0.0;
+		
+		for(Map.Entry<MediaItem, String> entry : cartList.entrySet())
+		{
+		 if(!entry.getKey().getMediaType().equalsIgnoreCase("Game"))
+			newPrice += entry.getKey().getPrice();
+		 else
+			 newPrice += entry.getKey().getPrice() * Integer.parseInt(entry.getValue());
+			 
+		}
+		return String.valueOf(newPrice);
+	}
 }

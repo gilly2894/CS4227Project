@@ -682,7 +682,7 @@ UserFactory userFactory = new UserFactory();
 					 * cant enter in a new product, can't figure out the logic?
 					 */
 				    if (components[0].equals((userID))) {
-				    	aLineFromFile = "";
+				    	aLineFromFile = ""+userID;
 				    }
 				    linesFromShoppingCartFile.add(aLineFromFile);
 				}

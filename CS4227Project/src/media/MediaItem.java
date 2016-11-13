@@ -1,16 +1,15 @@
 package media;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
-public abstract class MediaItem
+public class MediaItem implements I_Subject
 {
 	private String mediaType="", mediaID="", title="", creator="", genre="", releaseType="", description="", format="";
 	private double price = 0.0, rating = 0.0;
 	private PriceBundler bundler;
-	
-	public abstract void paymentMethod(String userID, String fileName, String filePrice, String paymentMethod, String confirmation) throws IOException;
-	public abstract void payWithWallet(String userID, String fileName, String filePrice) throws IOException;
-	
+	private ArrayList<I_Observer> observers = new ArrayList<I_Observer>();
+
 	public MediaItem createMediaItem(String aLineFromFile)
 	{
 		String[] filmArr = aLineFromFile.split(",");
@@ -26,6 +25,27 @@ public abstract class MediaItem
 		this.format = filmArr[9];
 		return this;
 		
+	}
+	
+	
+
+	
+	@Override
+	public void registerObserver(I_Observer o) {
+		observers.add(o);
+		
+	}
+
+	@Override
+	public void removeObserver(I_Observer o) {
+		System.out.println("Removing Cart " + ((ShoppingCart)o).getCartID());
+		observers.remove(observers.indexOf(o));
+	}
+
+	@Override
+	public void notifyObservers() {
+		for (I_Observer c : observers)
+			c.update(this);
 	}
 	
 	
@@ -119,10 +139,5 @@ public abstract class MediaItem
 		+ "," + getType() + "," + getPrice() + "," + getDescription() + "," + getRating()
 		 + ","  + getFormat() ;
 		
-	}
-	
-
-	
-	
-	
+	}	
 }

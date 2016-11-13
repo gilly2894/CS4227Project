@@ -35,6 +35,10 @@ public class DatabaseFetcher {
 		database.addUser(currentUser);
 	}
 	
+	
+	 public void removeMediaFromCartFile(MediaItem m, String userID) throws IOException {
+		 database.removeMediaFromCartFile(m, userID);
+	 }
 	public int getHighestUserID()
 	{
 		return database.getUsers().get(database.getUsers().size()-1).getUserID();
@@ -98,6 +102,24 @@ public class DatabaseFetcher {
 			e.printStackTrace();
 		}
 		
+	}
+
+	public void updateShoppingCartFile(String cartID, String itemID, String qty){
+		try {
+			database.updateShoppingCartFile(cartID ,itemID, qty);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+	public void clearUsersCart(String userID) throws IOException {
+		database.clearUsersCart(userID);
+		
+	}
+
+	public void updateOnlineRepository(String userID, HashMap<MediaItem, String> cartList) throws IOException {
+		database.addToRepository(userID,cartList);
 	}
 
 }

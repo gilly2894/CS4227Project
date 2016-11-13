@@ -32,18 +32,7 @@ public class FilmClass extends MediaItem {
 		return (FilmClass) super.createMediaItem(aLineFromFile);
 	}
 	
-	@Override
-	public void paymentMethod(String userID, String fileName, String filePrice, String paymentMethod,
-			String confirmation) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void payWithWallet(String userID, String fileName, String filePrice) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
+	
 
 
 

@@ -147,7 +147,7 @@ public class UserInterfaceMenu {
 		JOptionPane.showMessageDialog(null, "Thanks you for registering " + currentUser.getName() + "\nYou are a " + currentUser.getType());
 		
 		//  go into the correct functionality for the type of user you are
-		userActionMenu();
+		newActionMenu();
 	}
 	
 	public void newActionMenu() throws IOException
@@ -158,49 +158,23 @@ public class UserInterfaceMenu {
 		// this checks what type of users you are
 		String type = currentUser.getType();
 		
-		// then goes in to the correct functionality based on what type of user you are
 		if(type.equalsIgnoreCase("Admin"))
 		{
 			while(stillLoggedIn)
 			{
-				// this shows the Admin dropdown menu and returns the selection from it
 				returnedMenuSelection = showAdminMenu();
 
-				if(returnedMenuSelection.equals("Add User"))
-				{
-					// calls the method to get the user input for a new user
-					String userToCreate = addNewUser();
-					
-					invoker.setCommand(new AF_AddNewUserCommand(new C_AdminActions()));
-					invoker.optionSelectedWithStringParam(userToCreate);
-				
-				}
-				
-				else if(returnedMenuSelection.equals("Delete User"))
-				{
-					// calls the method to get the name of the user you want to delete
-					String userToRemove = UserToRemove();
-					
-					invoker.setCommand(new AF_RemoveUserCommand(new C_AdminActions()));
-					invoker.optionSelectedWithStringParam(userToRemove);
-				}
-				
-				else if(returnedMenuSelection.equals("Update User"))
-				{
-					//  calls the method to get the user to be updated, what part is being updated, and the new value
-					String updateUser = UserToUpdate();
-					
-					invoker.setCommand(new AF_UpdateUserCommand(new C_AdminActions()));
-					invoker.optionSelectedWithStringParam(updateUser);
-				}
-				else if(returnedMenuSelection.equals("Logout")){
-					//this will break the loop and log user out
+				if(returnedMenuSelection.equalsIgnoreCase("Logout")){
 					stillLoggedIn = false;
+				}
+				else
+				{
+					adminMenuChoices(returnedMenuSelection);
 				}
 			}
 		}
 		
-		if(type.equalsIgnoreCase("Customer"))
+		if(type.matches("Customer"))
 		{
 			CustomerClass customer = ((CustomerClass)currentUser);
 			customer.setCart(databaseFetcher.initializeUsersShoppingCart(Integer.toString(customer.getUserID())));
@@ -211,7 +185,9 @@ public class UserInterfaceMenu {
 				
 				if(returnedMenuSelection.equalsIgnoreCase("Browse Media Catalogue"))
 				{
-					browseMediaList();
+					MediaItem item = browseMediaList("OUR_DATABASE");
+					if(item!=null)
+						purchasingOptions(item);
 				}
 				
 				else if(returnedMenuSelection.equalsIgnoreCase("Search for Media Item"))
@@ -226,65 +202,9 @@ public class UserInterfaceMenu {
 						// infoString : username_mediaTitle_purchaseType_paymentOption
 						String infoString = currentUser.getUsername() + ",";
 						infoString += media.getTitle() + ",";
-						//String choice = customerMediaItemDetailsAndReturnedChoice(media);
-						/*String howToProceed =*/ purchasingOptions(media);
-	/*					String platformChoice= infoString;
 						
-						// new code
-						if(!howToProceed.equals("Cancel"))
-						{
-							
-								
-							if(howToProceed.equalsIgnoreCase("Buy Media Item"))
-							{
-								
-								boolean platform= false;
-								if(media.getMediaType().equalsIgnoreCase("GAME"))
-								{
-									String choice4= getChoicePlatform(media);
-									if(!choice4.equals("Cancel"))
-									{	
-										String returnChoice= infoString + choice4 + ","; 
-										platform=true;
-										invoker.setCommand(new CF_ChoosePlatformCommand(new PlatformChoice()));
-										invoker.optionSelectedWithStringParam(returnChoice);
-										
-										
-									}
-								}
-								String purchaseType = purchaseType(media);
-								if(!purchaseType.equals("Cancel"))
-								{
-									infoString += purchaseType.substring(0, purchaseType.indexOf("-")-1) + ",";
-									
-									//TODO! take out this choice : don't use Credit card anymore
-									String paymentChoice = paymentMethod();
-									if(!paymentChoice.equals("Cancel"))
-									{
-										infoString += paymentChoice;
-										
-										invoker.setCommand(new CF_BuyMediaItemCommand(new Payment()));
-										invoker.optionSelectedWithStringParam(infoString);
-										
-									}
-								}
-//								if(platform=true)
-//								{
-//									platformChoice+="NULLPLATFORM";
-//									invoker.setCommand(new CF_ChoosePlatformCommand(new PlatformChoice()));
-//									invoker.optionSelectedWithStringParam(platformChoice);
-//								}
-							}
-							
-							
-							else if(howToProceed.equalsIgnoreCase("Add To Cart"))
-							{
-								// TODO! invoker code here for add to cart functionality 
-								System.out.println("In search for media item : Add to Cart option");
-							}
-						}
-						*/
-						// new code
+						purchasingOptions(media);
+
 					}
 				}
 				
@@ -295,23 +215,12 @@ public class UserInterfaceMenu {
 					// gets shopping cart from user and gets list of cart Items
 					// stored in hashmap in form of Media,Quantity
 					Map<MediaItem, String> cartList = customer.getCart().getCartList();
-					Object[] choices = { "Display Items", "Delete Items", "Change Quantity of an Item", "Checkout",
-							"Clear Shopping Cart", "Quit" };
-					String choice = (String) JOptionPane.showInputDialog(null, "Shopping Cart Menu!", "", 1, null,
-							choices, choices[0]);
+					String choice = displayShoppingCartMenu();
 					// userMenu.userActions(returnedSelection, choice);
 					if (choice.equals("Display Items")) {
-						cartList = customer.getCart().getCartList();
-						int i = 0;
-						Object[] fullListToDisplay = new Object[cartList.size() + 1];
-						for (Map.Entry<MediaItem, String> entry : cartList.entrySet()) {
-							fullListToDisplay[i] = entry.getKey().getTitle() + " - " + entry.getKey().getMediaType();
-							i++;
-						}
-						fullListToDisplay[cartList.size()] = "Cancel";
-						String select = (String) JOptionPane.showInputDialog(null, "Choose Media Item",
-								"Customer : " + currentUser.getName(), 1, null, fullListToDisplay,
-								fullListToDisplay[0]);
+						
+						String mediaTitle = displayItemsFromCart(customer);
+						// add code for next menu: item selecton for update or deletion
 					}
 
 					else if (choice.equals("Delete Items")) {
@@ -330,12 +239,16 @@ public class UserInterfaceMenu {
 							String select = (String) JOptionPane.showInputDialog(null,
 									"Choose Media Item To Delete From Cart", "Customer : " + currentUser.getName(), 1,
 									null, fullListToDisplay, fullListToDisplay[0]);
-							select = select.substring(0, select.indexOf("-") - 1).trim();
-							// select is the movieID of the movie we want to
-							customer.getCart().removeItem(databaseFetcher.getMediaItemByName(select));
-							databaseFetcher.updateShoppingCartFile(Integer.toString(currentUser.getUserID()),
-									databaseFetcher.getMediaItemByName(select).getMediaID(), "0");
-
+							if(!select.equals("Cancel"))
+							{
+								select = select.substring(0, select.indexOf("-") - 1).trim();
+								// select is the movieID of the movie we want to
+								customer.getCart().removeItem(databaseFetcher.getMediaItemByName(select));
+								databaseFetcher.updateShoppingCartFile(Integer.toString(currentUser.getUserID()),
+										databaseFetcher.getMediaItemByName(select).getMediaID(), "0");
+							}
+							//so, this was going to jsut check if they were done but I'd say I just but in a boolean when implementing it. We're going to find a lot of those
+							// ok cool so this is the method that I have extracted :) i'm gonna just have this one method for browse update qty and delete!
 							done = true;
 						} while (!done);
 					}
@@ -499,542 +412,236 @@ public class UserInterfaceMenu {
 				}
 			}
 		}
-		
 		else if(type.equalsIgnoreCase("Staff"))
 		{
 			while(stillLoggedIn)
 			{
-				// this shows the Admin drop down menu and returns the selection from it
 				returnedMenuSelection = showStaffMenu();
 
-			      boolean viewing = true;
-				if(returnedMenuSelection.equals("View Catalogue"))
-				{
-					String viewCatalogue = ViewWhichCatalogue();
-					if (!viewCatalogue.equals("Cancel"))
-					{
-						if (viewCatalogue.equals("View Our Catalogue"))
-						{					
-							MediaItem media = browseMediaList("Staff");
-							while(viewing){
-							if(media!=null)
-							{
-								
-								String returnString = currentUser.getUsername() + ",";
-								returnString+= media.getTitle() + ",";
-								String choice = StaffMediaItemDetails(media);
-								
-								if(!choice.equals("Return to Menu")) 
-								{
-									
-									if(choice.equals("Edit"))
-									{
-										originator.setState(media.toFileString());
-										returnString+= ItemToUpdate();
-		
-										invoker.setCommand(new UpdateItemCommand(new C_StaffActions()));
-										invoker.optionSelectedWithStringParam(returnString);
-										careTaker.addMemento(originator.saveStateToMemento());
-										numberOfStates++;
-										currentState++;
-										
-									}
-		
-									else if(choice.equals("Remove"))
-									{
-										invoker.setCommand(new RemoveItemCommand(new C_StaffActions()));
-										invoker.optionSelectedWithStringParam(returnString);
-										viewing = false;
-									}
-									else if (choice.equals("Undo"))
-									{
-										if(currentState >= 1)
-										{
-											currentState--;
-											String oldState = originator.restoreFromMemento(careTaker.getMemento(currentState));
-											invoker.setCommand(new UndoCommand(new C_StaffActions()));
-											invoker.optionSelectedWithStringParam(oldState);
-										}
-										else
-										{
-											JOptionPane.showMessageDialog(null, "Cannot perform operation!", "Error", JOptionPane.ERROR_MESSAGE);
-										}
-									}
-									else if (choice.equals("Redo"))
-									{
-										if((numberOfStates -1) > currentState)
-										{
-											currentState++;
-											String redoState = originator.restoreFromMemento(careTaker.getMemento(currentState));
-											invoker.setCommand(new UndoCommand(new C_StaffActions()));
-											invoker.optionSelectedWithStringParam(redoState);
-										}
-										else
-										{
-											JOptionPane.showMessageDialog(null, "Cannot perform operation!", "Error", JOptionPane.ERROR_MESSAGE);
-										}
-									}
-									
-								}
-								else //Returns back to menu
-								{
-									viewing = false;
-								}
-							}
-						  }
-						}
-					}
+				if(returnedMenuSelection.equalsIgnoreCase("Logout")){
+					stillLoggedIn = false;
 				}
-
-
-				else if(returnedMenuSelection.equals("Search Media Item"))
+				else
 				{
-					String catalogue = SearchWhichCatalogue();
-					if (!catalogue.equals("Cancel"))
-					{
-						if (catalogue.equals("Search Our Catalogue"))
-						{
-							MediaItem media = searchforItem("MEGASTREAM");
-
-							if(media!=null)
-							{
-								String returnString = currentUser.getUsername() + ",";
-								returnString+= media.getTitle() + ",";
-								String choice = StaffMediaItemDetails(media);
-								if(!choice.equals("Cancel")) 
-								{
-									if(choice.equals("Edit"))
-									{
-										returnString+= ItemToUpdate();
-
-										invoker.setCommand(new UpdateItemCommand(new C_StaffActions()));
-										invoker.optionSelectedWithStringParam(returnString);
-									}
-
-									else if(choice.equals("Remove"))
-									{
-										invoker.setCommand(new RemoveItemCommand(new C_StaffActions()));
-										invoker.optionSelectedWithStringParam(returnString);
-									}
-								}
-
-							}
-						}
-					}
-				
-						else if (catalogue.equals("Search Supplier Catalogue"))
-						{
-							MediaItem media = searchforItem("SUPPLIER");
-							String returnString = currentUser.getUsername() + ",";
-							returnString+= media.getTitle() + ",";
-							String choice = SupplierItemDetails(media);
-							if(!choice.equals("Cancel"))
-							{
-								if (choice.equals("Add to Catalogue"))
-								{
-									invoker.setCommand(new AddItemCommand(new C_StaffActions()));
-									invoker.optionSelectedWithStringParam(returnString);
-								}
-							}
-						}
-					}
-				
-
-					else if(returnedMenuSelection.equals("Logout"))
-					{
-						//this will break the loop and log user out
-						stillLoggedIn = false;
-					}		
-					
+					staffMenuChoices(returnedMenuSelection);
 				}
 			}
+		}
 	}
 	
-	
-	
-	//This is the class that lets us access the business logic
-		public void userActionMenu() throws IOException
+	public void adminMenuChoices(String menuSelection) throws IOException
+	{
+		if(menuSelection.equalsIgnoreCase("Add User"))
 		{
-			boolean stillLoggedIn = true;
-			String returnedSelection = "";
+			// calls the method to get the user input for a new user
+			String userToCreate = addNewUser();
 			
-			// this checks what type of users you are
-			String type = currentUser.getType();
+			invoker.setCommand(new AF_AddNewUserCommand(new C_AdminActions()));
+			invoker.optionSelectedWithStringParam(userToCreate);
+		
+		}
+		
+		else if(menuSelection.equalsIgnoreCase("Delete User"))
+		{
+			// calls the method to get the name of the user you want to delete
+			String userToRemove = UserToRemove();
 			
-			// then goes in to the correct functionality based on what type of user you are
-			if(type.matches("Admin"))
+			invoker.setCommand(new AF_RemoveUserCommand(new C_AdminActions()));
+			invoker.optionSelectedWithStringParam(userToRemove);
+		}
+		
+		else if(menuSelection.equalsIgnoreCase("Update User"))
+		{
+			//  calls the method to get the user to be updated, what part is being updated, and the new value
+			String updateUser = UserToUpdate();
+			
+			invoker.setCommand(new AF_UpdateUserCommand(new C_AdminActions()));
+			invoker.optionSelectedWithStringParam(updateUser);
+		}
+	}
+	
+	public void staffMenuChoices(String menuSelection) throws IOException
+	{
+		if(menuSelection.equals("View Catalogue"))
+		{
+			String viewCatalogue = ViewWhichCatalogue();
+			if (!viewCatalogue.equals("Cancel"))
 			{
-				while(stillLoggedIn)
-				{
-					// this shows the Admin dropdown menu and returns the selection from it
-					returnedSelection = showAdminMenu();
-					
-					// userMenu is of refrence type I_UserActions, which is the base class(An interface)
-					// new C_AdminActions(); calls the constructor of C_AdminActions(C is for control class) so that 
-					// userMenu.methodName() will call the methods in C_AdminActions
-					userMenu = new C_AdminActions();
-					
-					//
-					if(returnedSelection.equals("Add User"))
+				if (viewCatalogue.equals("View Our Catalogue"))
+				{					
+					MediaItem media = browseMediaList("OUR_DATABASE");
+					if(media!=null)
 					{
-						// calls the method to get the user input for a new user
-						String userToCreate = addNewUser();
-						
-						//calls the userActions method that is in C_AdminActions as userMenu was created with C_AdminActions as the
-						//concrete class
-						userMenu.userActions(returnedSelection, userToCreate);
-					
-					}
-					
-					else if(returnedSelection.equals("Delete User"))
-					{
-						// calls the method to get the name of the user you want to delete
-						String userToRemove = UserToRemove();
-						
-						// calls the userActions method that is in C_AdminActions as userMenu was created with C_AdminActions as the
-						// concrete class
-						userMenu.userActions(returnedSelection, userToRemove);
-					}
-					
-					else if(returnedSelection.equals("Update User"))
-					{
-						//  calls the method to get the user to be updated, what part is being updated, and the new value
-						String updateUser = UserToUpdate();
-						
-						//calls the userActions method that is in C_AdminActions as userMenu was created with C_AdminActions as the
-						//concreate class
-						userMenu.userActions(returnedSelection, updateUser);
-					}
-					else if(returnedSelection.equals("Logout")){
-						//this will break the loop and log user out
-						stillLoggedIn = false;
+						staffOptionsOurCatalogue(media);
 					}
 				}
-			}
-			else if(type.matches("Customer"))
-			{
-				JOptionPane.showMessageDialog(null, "message");
-				CustomerClass customer = ((CustomerClass)currentUser);
-				while(stillLoggedIn)
+				else if (viewCatalogue.equals("View Supplier Catalogue"))
 				{
-					// this shows the customer dropdown menu and returns the selection from it
-					returnedSelection = showCustomerMenu();
-					
-					// new C_AdminActions(); calls the constructor of C_AdminActions(C is for control class) so that 
-					// userMenu.methodName() will call the methods in C_AdminActions
-					userMenu = new C_CustomerActions();
-					
-					//
-					if(returnedSelection.equals("Browse Media List"))
+					MediaItem media = browseMediaList("SUPPLIERS_DATABASE");
+					staffOptionsSuppliersCatalogueS(media);
+				}	
+			}
+		}
+		else if(menuSelection.equals("Search Media Item"))
+		{
+			String catalogue = SearchWhichCatalogue();
+			if (!catalogue.equals("Cancel"))
+			{
+				if (catalogue.equals("Search Our Catalogue"))
+				{
+					MediaItem media = searchforItem("MEGASTREAM");
+
+					if(media!=null)
 					{
-						browseMediaList();
-					}
-					
-					else if(returnedSelection.equals("Search by Category"))
-					{
-						//to be filled
-					}
-					
-					else if(returnedSelection.equals("View Shopping Cart"))
-					{
-
-						// gets shopping cart from user and gets list of cart Items
-						// stored in hashmap in form of Media,Quantity
-						Map<MediaItem, String> cartList = customer.getCart().getCartList();
-						System.out.println(cartList + "here");
-						Object[] choices = { "Display Items", "Delete Items", "Change Quantity of an Item", "Checkout",
-								"Clear Shopping Cart", "Quit" };
-						String choice = (String) JOptionPane.showInputDialog(null, "Shopping Cart Menu!", "", 1, null,
-								choices, choices[0]);
-						// userMenu.userActions(returnedSelection, choice);
-						if (choice.equals("Display Items")) {
-							int i = 0;
-							Object[] fullListToDisplay = new Object[cartList.size() + 1];
-							for (Map.Entry<MediaItem, String> entry : cartList.entrySet()) {
-								fullListToDisplay[i] = entry.getKey().getTitle() + " - " + entry.getKey().getMediaType();
-								i++;
-							}
-							fullListToDisplay[cartList.size()] = "Cancel";
-							String select = (String) JOptionPane.showInputDialog(null, "Choose Media Item",
-									"Customer : " + currentUser.getName(), 1, null, fullListToDisplay,
-									fullListToDisplay[0]);
-						}
-
-						else if (choice.equals("Delete Items")) {
-							boolean done = false;
-							do {
-								int i = 0;
-								Object[] fullListToDisplay = new Object[cartList.size() + 1];
-								for (Map.Entry<MediaItem, String> entry : cartList.entrySet()) {
-
-									fullListToDisplay[i] = entry.getKey().getTitle() + " - " + " --- "
-											+ entry.getKey().getMediaType();
-									i++;
-								}
-								fullListToDisplay[cartList.size()] = "Cancel";
-								String select = (String) JOptionPane.showInputDialog(null,
-										"Choose Media Item To Delete From Cart", "Customer : " + currentUser.getName(), 1,
-										null, fullListToDisplay, fullListToDisplay[0]);
-								select = select.substring(0, select.indexOf("-") - 1).trim();
-								// select is the movieID of the movie we want to
-								customer.getCart().removeItem(databaseFetcher.getMediaItemByName(select));
-								databaseFetcher.updateShoppingCartFile(Integer.toString(currentUser.getUserID()),
-										databaseFetcher.getMediaItemByName(select).getMediaID(), "0");
-
-								done = true;
-							} while (!done);
-						}
-
-						else if (choice.equals("Change Quantity of an Item")) {
-							String qty;
-							int i = 0;
-							Object[] fullListToDisplay = new Object[cartList.size() + 1];
-							for (Map.Entry<MediaItem, String> entry : cartList.entrySet()) {
-
-								fullListToDisplay[i] = entry.getKey().getMediaType() + " - " + entry.getKey().getTitle();
-								i++;
-
-							}
-							fullListToDisplay[cartList.size()] = "Cancel";
-							choice = (String) JOptionPane.showInputDialog(null, "Choose Media Item to Change Quantity of",
-									"Customer : " + currentUser.getName(), 1, null, fullListToDisplay,
-									fullListToDisplay[0]);
-
-							choice = choice.substring(choice.indexOf("-") + 2);
-							boolean valid = false;
-							do {
-								qty = (String) JOptionPane.showInputDialog(null,
-										"What quantity would you like to change " + choice + " to?");
-								// gets qty, chnage to int
-								if (Integer.parseInt(qty) < 0) {
-									JOptionPane.showMessageDialog(null, "You cannot enter a quantity less than 0!",
-											"Quantity Input Error", JOptionPane.ERROR_MESSAGE);
-								}
-
-								else if (Integer.parseInt(qty) == 0) {
-									int response = JOptionPane.showConfirmDialog(null,
-											"This will remove the Item from your shopping cart. Do you wish to continue?",
-											"Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-									if (response == JOptionPane.NO_OPTION) {
-										valid = false;
-									} else if (response == JOptionPane.YES_OPTION) {
-										customer.getCart().removeItem(databaseFetcher.getMediaItemByName(choice));
-										valid = true;
-									} else if (response == JOptionPane.CANCEL_OPTION) {
-										valid = true;
-									} else
-										valid = false;
-								}
-
-								else if (qty == "" || qty == null || qty.length() <= 0)
-									valid = true;
-								else {
-									valid = true;
-								}
-							} while (!valid);
-
-							customer.getCart().updateQuantity(databaseFetcher.getMediaItemByName(choice), qty);
-							databaseFetcher.updateShoppingCartFile(Integer.toString(currentUser.getUserID()),
-									databaseFetcher.getMediaItemByName(choice).getMediaID(), qty);
-						}
-
-						else if (choice.equals("Checkout")) {
-							// option to buy or cancel
-							String message = "";
-							for (Map.Entry<MediaItem, String> entry : cartList.entrySet()) {
-
-								message += entry.getKey().getTitle() + "      Quantity: " + entry.getValue()
-								+ "\t          €" + entry.getKey().getPrice() + "\n";
-
-							}
-							message += "\n\nTotal Price is :                € " + customer.getCart().getTotalCost();
-							JOptionPane.showMessageDialog(null, message);
-
-							JFrame frame = new JFrame();
-
-							Object stringArray[] = { "Ship All Item to my Address", "Add to Repository", "Cancel" };
-							int response = JOptionPane.showOptionDialog(frame,
-									"Games can only be shipped to registered Address!\nWould you like to add the other items to your repository or have them shipped?",
-									"Select an Option", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
-									stringArray, stringArray[0]);
-
-							if (response == 0) {
-								// ship all items to address
-								if (customer.purchase(customer.getCart().getTotalCost())) {
-									// get payment and receipt
-									customer.getCart().clearCart();
-									// must clear the cart afterwards
-									databaseFetcher.clearUsersCart(Integer.toString(currentUser.getUserID()));
-								} else {
-									JOptionPane.showMessageDialog(null,
-											"You don't have sufficient funds!! Current Balance:  € "
-													+ customer.getBalance());
-								}
-							} else if (response == 1) {
-								JOptionPane.showMessageDialog(null,
-										"If you add to the repository, you only need one quantity. New price: €"
-												+ customer.getCart().getSingleQuantityPrice());
-								databaseFetcher.updateOnlineRepository(Integer.toString(customer.getUserID()),
-										customer.getCart().getCartList());
-								customer.getCart().clearCart();
-								// must clear the cart afterwards
-								databaseFetcher.clearUsersCart(Integer.toString(currentUser.getUserID()));
-
-							} else if (response == JOptionPane.CLOSED_OPTION || response == 2) {
-								break;
-							}
-
-						} else if (choice.equals("Clear Shopping Cart")) {
-							int response = JOptionPane.showConfirmDialog(null,
-									"This will clear all Items in your shopping cart!! Do you want to continue?", "Confirm",
-									JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-							if (response == JOptionPane.NO_OPTION) {
-								break;
-							} else if (response == JOptionPane.YES_OPTION) {
-								customer.getCart().clearCart();
-								databaseFetcher.clearUsersCart(Integer.toString(currentUser.getUserID()));
-							} else if (response == JOptionPane.CLOSED_OPTION)
-								break;
-						}
-
-						else if (choice.equals("Quit")) {
-							break;
-						}
-					}
-					
-					else if(returnedSelection.equals("Search for Media Item"))
-					{
-						MediaItem media = searchforItem("MEGASTREAM");
-						
-						if(media!=null)
-						{
-							String returnString = currentUser.getUsername() + ",";
-							returnString+= media.getTitle() + ",";
-							/*String choice =*/ purchasingOptions(media);
-						}
-					}
-	/*						String platformChoice= returnString;
-							if(!choice.equals("Cancel")) 
-							{
-								boolean platform= false;
-								if(choice.equals("Choose Platform"))
-								{
-									String choice4= getChoicePlatform(media);
-									if(!choice4.equals("Cancel"))
-									{	
-										String returnChoice= returnString + choice4 + ","; 
-										platform=true;
-										userMenu.userActions("Choose Platform", returnChoice);
-										
-									}
-								}
-								String choice2 = paymentMethod();
-								if(!choice2.equals("Cancel"))
-								{
-									
-									String choice3 = confirmPurchase();
-									returnString += (choice + ",");
-									returnString += (choice2 + ",");
-									
-									returnString += choice3;
-									if(choice3.equals("Confirm Purchase"))
-									{
-										userMenu.userActions(returnedSelection, returnString);
-										displayReceipt(media);
-										if(platform=true)
-										{
-											platformChoice+= "NULLPLATFORM";
-											userMenu.userActions("Choose Platform", platformChoice);
-											platform=false;
-										}
-										
-									}
-									//returnedSelection is the result of the first dropdown : "Search For Film"
-									//returnString contains 3 comma separated values : currentUsers username, name of film,
-									//and the choice of whether they want to buy or rent it
-									
-								}
-							}
-						}
-					} */
-					
-					else if(returnedSelection.equals("View Media Repository"))
-					{
-						//to be filled
-						//String returnString = currentUser.getUserID() + ",";
-						int userID = currentUser.getUserID();
-						String chosenMediaItemID = viewCustomersMediaRepository(userID);
-						if(!chosenMediaItemID.equals("Cancel"))
-						{	
-							String returnFilmName = chosenMediaItemID;
-							userMenu.userActions(returnedSelection, returnFilmName);
-						}
-						
-					}
-					
-					else if(returnedSelection.equals("Add Funds to Wallet"))
-					{
-						String username= currentUser.getUsername();
-						String ammount= amountToAddToWallet();
-						
-						String confirmation= confirmPurchase();
-						if (confirmation!= "Cancel" || ammount!= "Cancel")
-						{
-							String id_amount= username + "," + ammount;
-							userMenu.userActions(returnedSelection, id_amount);
-						}
-						
-					}
-					
-					else if(returnedSelection.equals("Logout"))
-					{
-						//this will break the loop and log user out
-						stillLoggedIn = false;
+						staffOptionsOurCatalogue(media);
 					}
 				}
-			}
-			else if(type.matches("Staff"))
-			{
-				while(stillLoggedIn)
+				else if (catalogue.equals("Search Supplier Catalogue"))
 				{
-					// this shows the staff dropdown menu and returns the selection from it
-					returnedSelection = showStaffMenu();
+					MediaItem media = searchforItem("SUPPLIER");
+					staffOptionsSuppliersCatalogueS(media);
+				}
+			}
+		}
+		
+		else if (menuSelection.equals("Add Promotion"))
+		{
+			//TODO add promotion
+		}
+		
+	}
+	
+	/**
+	 * @param media
+	 * @return
+	 */
+	private void staffOptionsOurCatalogue(MediaItem media) {
+		boolean viewing = true;
+		while(viewing)
+		{
+			String returnString = currentUser.getUsername() + ",";
+			returnString+= media.getTitle() + ",";
+			String choice = StaffMediaItemDetails(media);
 
-					//userMenu = new C_CustomerActions();
-					
-					if(returnedSelection.equals("View Catalogue"))
+			if(!choice.equals("Return to Menu")) 
+			{
+
+				if(choice.equals("Edit"))
+				{
+					originator.setState(media.toFileString());
+					returnString+= ItemToUpdate();
+
+					invoker.setCommand(new UpdateItemCommand(new C_StaffActions()));
+					invoker.optionSelectedWithStringParam(returnString);
+					careTaker.addMemento(originator.saveStateToMemento());
+					numberOfStates++;
+					currentState++;
+
+				}
+				//browse
+				else if(choice.equals("Remove"))
+				{
+					invoker.setCommand(new RemoveItemCommand(new C_StaffActions()));
+					invoker.optionSelectedWithStringParam(returnString);
+					viewing = false;
+				}
+				else if (choice.equals("Undo"))
+				{
+					if(currentState >= 1)
 					{
-						//browseStaffMediaList();
+						currentState--;
+						String oldState = originator.restoreFromMemento(careTaker.getMemento(currentState));
+						invoker.setCommand(new UndoCommand(new C_StaffActions()));
+						invoker.optionSelectedWithStringParam(oldState);
 					}
-					else if(returnedSelection.equals("Search Media Item"))
+					else
 					{
-						MediaItem media = searchforItem("MEGASTREAM");
-						
-						if(media!=null)
-						{
-							String returnString = currentUser.getUsername() + ",";
-							returnString+= media.getTitle() + ",";
-							String choice = StaffMediaItemDetails(media);
-							if(!choice.equals("Cancel")) 
-							{
-								if(choice.equals("Edit"))
-								{
-									
-									// ItemToUpdate(media);
+						JOptionPane.showMessageDialog(null, "Cannot perform operation!", "Error", JOptionPane.ERROR_MESSAGE);
+					}
+				}
+				else if (choice.equals("Redo"))
+				{
+					if((numberOfStates -1) > currentState)
+					{
+						currentState++;
+						String redoState = originator.restoreFromMemento(careTaker.getMemento(currentState));
+						invoker.setCommand(new UndoCommand(new C_StaffActions()));
+						invoker.optionSelectedWithStringParam(redoState);
+					}
+					else
+					{
+						JOptionPane.showMessageDialog(null, "Cannot perform operation!", "Error", JOptionPane.ERROR_MESSAGE);
+					}
+				}
 
-									//userMenu.userActions(returnedSelection, updateItem);
-								}
-								
-								else if(choice.equals("Remove"))
-								{
-									
-								}
-							}
-						}
+			}
+			else //Returns back to menu
+			{
+				viewing = false;
+			}
+		}
+	}
+
+	/**
+	 * @param media
+	 */
+	private void staffOptionsSuppliersCatalogueS(MediaItem media) {
+		boolean viewing = true;
+		if(media!=null)
+		{					
+			while(viewing)
+			{
+				String returnString = currentUser.getUsername() + ",";
+				returnString+= media.getTitle() + ",";
+				String choice = SupplierItemDetails(media);
+				if(!choice.equals("Cancel"))
+				{
+					if (choice.equals("Add to Catalogue"))
+					{
+						invoker.setCommand(new AddItemCommand(new C_StaffActions()));
+						invoker.optionSelectedWithStringParam(returnString);
+					}
+					else if (choice.equals("Return to Menu"))
+					{
+						viewing = false;
 					}
 				}
 			}
 		}
+	}
+
+
+
+	/**
+	 * @param customer
+	 */
+	private String displayItemsFromCart(CustomerClass customer) {
+		Map<MediaItem, String> cartList;
+		cartList = customer.getCart().getCartList();
+		int i = 0;
+		Object[] fullListToDisplay = new Object[cartList.size() + 1];
+		for (Map.Entry<MediaItem, String> entry : cartList.entrySet()) {
+			fullListToDisplay[i] = entry.getKey().getMediaType() + " - " + entry.getKey().getTitle();
+			i++;
+		}
+		fullListToDisplay[cartList.size()] = "Cancel";
+		String selection = (String) JOptionPane.showInputDialog(null, "Choose Media Item",
+				"Customer : " + currentUser.getName(), 1, null, fullListToDisplay,
+				fullListToDisplay[0]);
+		if(!selection.equals("Cancel"))
+			selection = selection.substring(selection.indexOf("-") + 2);
+		return selection;
+	}
+
+	
+	private String displayShoppingCartMenu() {
+		Object[] choices = { "Display Items", "Delete Items", "Change Quantity of an Item", "Checkout",
+				"Clear Shopping Cart", "Quit" };
+		return (String) JOptionPane.showInputDialog(null, "Shopping Cart Menu!", "", 1, null,
+				choices, choices[0]);
+	}
+	
+
 		
 		
 	
@@ -1188,9 +795,16 @@ public class UserInterfaceMenu {
 				return updateString;
 			}
 			
-			public void browseMediaList(){
+			public MediaItem browseMediaList(String whichCatalogue){
+
 				ArrayList<MediaItem> mediaList=null;
-				mediaList = databaseFetcher.getMediaItems();
+				MediaItem item = null;
+				if (whichCatalogue.equalsIgnoreCase("OUR_DATABASE"))
+					mediaList= databaseFetcher.getMediaItems();
+				
+				else if(whichCatalogue.equalsIgnoreCase("SUPPLIERS_DATABASE"))
+					mediaList = databaseFetcher.getSupplierItems();
+				
 				boolean stillSearching = true, firstFive = false;
 				int k = 0;
 				String selectedItem = "";
@@ -1292,146 +906,149 @@ public class UserInterfaceMenu {
 							if(selectedItem.equals(mediaList.get(i).getMediaType()+" - " + mediaList.get(i).getTitle()))
 							{
 								filmFound = true;
-							//	return mediaList.getTitle(i);
-								purchasingOptions(mediaList.get(i));
+								item = mediaList.get(i);
 
 							}
 						}
 					} 
 				}
-				
-			}
-			public MediaItem browseMediaList(String whichCatalogue)
-			{
-				ArrayList<MediaItem> mediaList=null;
-				MediaItem item = null;
-				if (whichCatalogue.equalsIgnoreCase("Staff") || whichCatalogue.equalsIgnoreCase("Customer"))
-					mediaList= databaseFetcher.getMediaItems();
-				
-				else if(whichCatalogue.equalsIgnoreCase("Supplier"))
-					mediaList = databaseFetcher.getSupplierItems();
-				
-				//mediaList = databaseFetcher.getMediaItems();
-				boolean stillSearching = true, firstFive = false;
-				int k = 0;
-				String selectedItem = "";
-				int remainder = mediaList.size()%5;
-				if(mediaList.size() == 0)
-				{
-					JOptionPane.showMessageDialog(null, "There are no media items in the database!", "Error", JOptionPane.ERROR_MESSAGE);
-				}
-				while(stillSearching)
-				{
-					firstFive = false;
-					if(mediaList.size() <= 5)
-					{
-						if(mediaList.size() == 5)
-						{
-							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), mediaList.get(k+3).getMediaType()+" - " + mediaList.get(k+3).getTitle(), mediaList.get(k+4).getMediaType()+" - " + mediaList.get(k+4).getTitle(), "Quit"};
-							selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-							firstFive = true;
-						}
-						else if(remainder == 1)
-						{
-							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), "Quit"};
-							selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-							firstFive = true;
-						}
-						else if(remainder == 2)
-						{
-							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), "Quit"};
-							selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-							firstFive = true;
-						}
-						else if(remainder == 3)
-						{
-							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), "Quit"};
-							selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-							firstFive = true;
-						}
-						else if(remainder == 4)
-						{
-							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), mediaList.get(k+3).getMediaType()+" - " + mediaList.get(k+3).getTitle(), "Quit"};
-							selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-							firstFive = true;
-						}
-					}
-					if(!firstFive)
-					{
-						if(k == 0)
-						{	
-							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), mediaList.get(k+3).getMediaType()+" - " + mediaList.get(k+3).getTitle(), mediaList.get(k+4).getMediaType()+" - " + mediaList.get(k+4).getTitle(), "Show Next 5", "Quit"};
-							selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-						}
-						else if(k == mediaList.size()-remainder)
-						{
-							if(remainder == 1)
-							{
-								Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), "Show Previous 5", "Quit"};
-								selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-							}
-							else if(remainder == 2)
-							{
-								Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), "Show Previous 5", "Quit"};
-								selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-							}
-							else if(remainder == 3)
-							{
-								Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), "Show Previous 5", "Quit"};
-								selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-							}
-							else if(remainder == 4)
-							{
-								Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), mediaList.get(k+3).getMediaType()+" - " + mediaList.get(k+3).getTitle(), "Show Previous 5", "Quit"};
-								selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-							}
-						}
-						else
-						{
-							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k + 1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k + 2).getTitle(), mediaList.get(k+3).getMediaType()+" - " + mediaList.get(k + 3).getTitle(), mediaList.get(k+4).getMediaType()+" - " + mediaList.get(k + 4).getTitle(), "Show Previous 5", "Show Next 5", "Quit"};
-							selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-						}
-					}
-					
-					if(selectedItem.equals("Quit"))
-						stillSearching=false;
-					else if(selectedItem.equals("Show Next 5"))
-					{
-						k += 5;
-					}
-					else if(selectedItem.equals("Show Previous 5"))
-					{
-						k -= 5;
-					}
-					 else 
-					{
-						stillSearching=false;
-						boolean filmFound=false;
-						for(int i = 0; i < mediaList.size() && !filmFound; i++)
-						{
-							if(selectedItem.equals(mediaList.get(i).getMediaType()+" - " + mediaList.get(i).getTitle()))
-							{
-								if (whichCatalogue.equalsIgnoreCase("Staff"))
-								{
-									item = databaseFetcher.getMediaItemByName(mediaList.get(i).getTitle());
-									filmFound = true;
-								}
-								else if (whichCatalogue.equalsIgnoreCase("Supplier"))
-								{
-									item = databaseFetcher.getSupplierItemByName(mediaList.get(i).getTitle());
-									filmFound = true;
-								}
-								else if (whichCatalogue.equalsIgnoreCase("Customer"))
-								{
-									purchasingOptions(mediaList.get(i));
-									filmFound = true;
-								}
-							}
-						}
-					} 
-				}
 				return item;
+				
 			}
+			
+			
+			//REFACTORING_DONE_HERE
+//			public MediaItem browseMediaList(String whichCatalogue)
+//			{
+//				ArrayList<MediaItem> mediaList=null;
+//				MediaItem item = null;
+//				if (whichCatalogue.equalsIgnoreCase("OUR_DATABASE")
+//					mediaList= databaseFetcher.getMediaItems();
+//				
+//				else if(whichCatalogue.equalsIgnoreCase("Supplier"))
+//					mediaList = databaseFetcher.getSupplierItems();
+//				
+//				//mediaList = databaseFetcher.getMediaItems();
+//				boolean stillSearching = true, firstFive = false;
+//				int k = 0;
+//				String selectedItem = "";
+//				int remainder = mediaList.size()%5;
+//				if(mediaList.size() == 0)
+//				{
+//					JOptionPane.showMessageDialog(null, "There are no media items in the database!", "Error", JOptionPane.ERROR_MESSAGE);
+//				}
+//				while(stillSearching)
+//				{
+//					firstFive = false;
+//					if(mediaList.size() <= 5)
+//					{
+//						if(mediaList.size() == 5)
+//						{
+//							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), mediaList.get(k+3).getMediaType()+" - " + mediaList.get(k+3).getTitle(), mediaList.get(k+4).getMediaType()+" - " + mediaList.get(k+4).getTitle(), "Quit"};
+//							selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+//							firstFive = true;
+//						}
+//						else if(remainder == 1)
+//						{
+//							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), "Quit"};
+//							selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+//							firstFive = true;
+//						}
+//						else if(remainder == 2)
+//						{
+//							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), "Quit"};
+//							selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+//							firstFive = true;
+//						}
+//						else if(remainder == 3)
+//						{
+//							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), "Quit"};
+//							selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+//							firstFive = true;
+//						}
+//						else if(remainder == 4)
+//						{
+//							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), mediaList.get(k+3).getMediaType()+" - " + mediaList.get(k+3).getTitle(), "Quit"};
+//							selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+//							firstFive = true;
+//						}
+//					}
+//					if(!firstFive)
+//					{
+//						if(k == 0)
+//						{	
+//							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), mediaList.get(k+3).getMediaType()+" - " + mediaList.get(k+3).getTitle(), mediaList.get(k+4).getMediaType()+" - " + mediaList.get(k+4).getTitle(), "Show Next 5", "Quit"};
+//							selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+//						}
+//						else if(k == mediaList.size()-remainder)
+//						{
+//							if(remainder == 1)
+//							{
+//								Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), "Show Previous 5", "Quit"};
+//								selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+//							}
+//							else if(remainder == 2)
+//							{
+//								Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), "Show Previous 5", "Quit"};
+//								selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+//							}
+//							else if(remainder == 3)
+//							{
+//								Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), "Show Previous 5", "Quit"};
+//								selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+//							}
+//							else if(remainder == 4)
+//							{
+//								Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), mediaList.get(k+3).getMediaType()+" - " + mediaList.get(k+3).getTitle(), "Show Previous 5", "Quit"};
+//								selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+//							}
+//						}
+//						else
+//						{
+//							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k + 1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k + 2).getTitle(), mediaList.get(k+3).getMediaType()+" - " + mediaList.get(k + 3).getTitle(), mediaList.get(k+4).getMediaType()+" - " + mediaList.get(k + 4).getTitle(), "Show Previous 5", "Show Next 5", "Quit"};
+//							selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
+//						}
+//					}
+//					
+//					if(selectedItem.equals("Quit"))
+//						stillSearching=false;
+//					else if(selectedItem.equals("Show Next 5"))
+//					{
+//						k += 5;
+//					}
+//					else if(selectedItem.equals("Show Previous 5"))
+//					{
+//						k -= 5;
+//					}
+//					 else 
+//					{
+//						stillSearching=false;
+//						boolean filmFound=false;
+//						for(int i = 0; i < mediaList.size() && !filmFound; i++)
+//						{
+//							if(selectedItem.equals(mediaList.get(i).getMediaType()+" - " + mediaList.get(i).getTitle()))
+//							{
+//								if (whichCatalogue.equalsIgnoreCase("Staff"))
+//								{
+//									item = databaseFetcher.getMediaItemByName(mediaList.get(i).getTitle());
+//									filmFound = true;
+//								}
+//								else if (whichCatalogue.equalsIgnoreCase("Supplier"))
+//								{
+//									item = databaseFetcher.getSupplierItemByName(mediaList.get(i).getTitle());
+//									filmFound = true;
+//								}
+//								else if (whichCatalogue.equalsIgnoreCase("Customer"))
+//								{
+//									purchasingOptions(mediaList.get(i));
+//									filmFound = true;
+//								}
+//							}
+//						}
+//					} 
+//				}
+//				return item;
+//			}
 			
 			public String ItemToUpdate()
 			{
@@ -1471,6 +1088,8 @@ public class UserInterfaceMenu {
 				return updateString;
 		}
 			
+			
+			//REFACTORING_DONE_HERE  --- don't think this method is ever called
 			public String ItemToRemove()
 			{
 				String userToRemoveUserName="";
@@ -1526,11 +1145,6 @@ public class UserInterfaceMenu {
 	public String showStaffMenu() {
 		Object [] selection = {"View Catalogue", "View Supplier Catalogue", "Search Media Item", "Add Promotion", "Logout"};
 		return (String) JOptionPane.showInputDialog(null, "What action would you like to perform?","Staff Member : " + currentUser.getName(), 1 , null, selection, selection[0]);
-	}
-	
-	public String showSupplierMenu() {
-		Object [] selection = {"Add new film to Supplier Catalogue", "View Supplier Catalogue", "Search for film in Supplier Catalogue", "Logout"};
-		return (String) JOptionPane.showInputDialog(null, "What action would you like to perform?","Supplier : " + currentUser.getName(), 1 , null, selection, selection[0]);
 	}
 	
 	public String showUserModificationMenu(boolean isCustomer) {
@@ -1818,7 +1432,7 @@ public class UserInterfaceMenu {
 	
 	public String SupplierItemDetails(MediaItem media)
 	{
-		Object [] selection = {"Add to Catalogue", "Cancel"};
+		Object [] selection = {"Add to Catalogue", "Return to Menu"};
 		return (String) JOptionPane.showInputDialog(null, media.toString(),"Staff : " + currentUser.getName(), 1 , null, selection, selection[0]);
 	}
 	

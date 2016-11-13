@@ -11,9 +11,7 @@ public class CustomerClass extends UserClass
 	private String balance="", address="";
 	private ShoppingCart cart;
 	
-	public ShoppingCart getCart() {
-		return cart;
-	}
+
 
 	public void setCart(ShoppingCart cart) {
 		this.cart = cart;
@@ -79,4 +77,7 @@ public class CustomerClass extends UserClass
 			return false;
 		}
 	}
+
+	public ShoppingCart getCart() {
+		return cart;	}
 }

@@ -12,7 +12,7 @@ public class ShoppingCart implements I_Observer{
 
 	private String cartID;
 	HashMap <MediaItem, String> cartList;
-	private double totalCost;
+	private double totalCost, discountTotal;
 	private static boolean priceChangeInCart = false;
 
 	public ShoppingCart(){
@@ -102,7 +102,13 @@ public class ShoppingCart implements I_Observer{
 		this.totalCost = totalCost;
 	}
 	
-
+	public double getDiscountTotal(){
+		return discountTotal;
+	}
+	public void setDiscountTotal(double discountTotal){
+		this.discountTotal = discountTotal;
+	}
+	
 	public boolean checkIfItemExists(MediaItem m) {
 		for(Map.Entry<MediaItem, String> entry : cartList.entrySet()){
 			if(entry.getKey().getMediaID().equals(m.getMediaID()))

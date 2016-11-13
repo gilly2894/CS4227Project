@@ -33,7 +33,6 @@ public class MediaItem implements I_Subject
 	@Override
 	public void registerObserver(I_Observer o) {
 		observers.add(o);
-		
 	}
 
 	@Override
@@ -139,5 +138,7 @@ public class MediaItem implements I_Subject
 		+ "," + getType() + "," + getPrice() + "," + getDescription() + "," + getRating()
 		 + ","  + getFormat() ;
 		
-	}	
+	}
+
+
 }

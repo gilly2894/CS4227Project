@@ -208,6 +208,14 @@ public class UserInterfaceMenu {
 					}
 				}
 				
+				else if(returnedMenuSelection.equalsIgnoreCase("Activate Promotion"))					
+				{	
+					double currentAmt = customer.getCart().getTotalCost();
+					System.out.println("Current Total" + currentAmt);
+					customer.getCart().setDiscountTotal((customer.getCart().getTotalCost() /100) *10);
+					customer.getCart().setTotalCost(currentAmt - customer.getCart().getDiscountTotal());
+					JOptionPane.showMessageDialog(null, "10% discount has been activated");
+				}
 				
 				else if(returnedMenuSelection.equalsIgnoreCase("View Shopping Cart"))					
 				{
@@ -316,7 +324,7 @@ public class UserInterfaceMenu {
 							+ "\t          €" + entry.getKey().getPrice() + "\n";
 
 						}
-						message += "\n\nTotal Price is :                € " + customer.getCart().getTotalCost();
+						message += "\nTotal Discount : € " + customer.getCart().getDiscountTotal() + "\nTotal Price is : € " + customer.getCart().getTotalCost();
 						JOptionPane.showMessageDialog(null, message);
 
 						JFrame frame = new JFrame();
@@ -503,12 +511,6 @@ public class UserInterfaceMenu {
 				}
 			}
 		}
-		
-		else if (menuSelection.equals("Add Promotion"))
-		{
-			//TODO add promotion
-		}
-		
 	}
 	
 	/**
@@ -1138,7 +1140,7 @@ public class UserInterfaceMenu {
 	
 	//new John
 	public String showCustomerMenu() {
-		Object [] selection = {"Browse Media Catalogue", "Search for Media Item", "View Shopping Cart", "View Media Repository", "Add Funds to Wallet", "View Profile", "Logout"};
+		Object [] selection = {"Browse Media Catalogue", "Search for Media Item", "View Shopping Cart", "Activate Promotion", "View Media Repository", "Add Funds to Wallet", "View Profile", "Logout"};
 		return (String) JOptionPane.showInputDialog(null, "What action would you like to perform?","Customer : " + currentUser.getName(), 1 , null, selection, selection[0]);
 	}
 	

@@ -32,6 +32,7 @@ public class ShoppingCart implements I_Observer{
 	}
 	
 	public void addItem(MediaItem m, String quantity) {
+		cartList.put(m, quantity);
 		m.registerObserver(this);
 		calculateTotalCost();
 	}
@@ -51,7 +52,6 @@ public class ShoppingCart implements I_Observer{
 		for (Map.Entry<MediaItem, String> entry : cartList.entrySet()) {
 			if(entry.getKey().equals(m)){
 				cartList.put(m, quantity);
-				addItem(m,quantity);
 			}
 		}
 		calculateTotalCost();

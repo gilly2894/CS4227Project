@@ -872,7 +872,7 @@ public class UserInterfaceMenu {
 								}
 							} else if (response == 1) {
 								JOptionPane.showMessageDialog(null,
-										"If you add to the repository, you only need one quantity *Tongue Pop*. New price: €"
+										"If you add to the repository, you only need one quantity. New price: €"
 												+ customer.getCart().getSingleQuantityPrice());
 								databaseFetcher.updateOnlineRepository(Integer.toString(customer.getUserID()),
 										customer.getCart().getCartList());
@@ -1684,7 +1684,7 @@ public class UserInterfaceMenu {
 		String opt= (String) JOptionPane.showInputDialog(null, media.toString(),"Customer : " + currentUser.getName(), 1 , null, selection, selection[0]);
 	
 		if(opt.equalsIgnoreCase("Buy Media Item"))
-		{	
+		{
 			if(media.getMediaType().equalsIgnoreCase("GAME"))
 			{
 			/*	String choice4= */getChoicePlatform(media);
@@ -1761,9 +1761,14 @@ public class UserInterfaceMenu {
 					}
 					else
 					{
+						if(media.getMediaType().equalsIgnoreCase("GAME"))
+						{
+							getChoicePlatform(media);
+						}
 						qty = (String) JOptionPane.showInputDialog(null, "How many would you like to add?");
 						//need to check for qantity is valid
-						customer.getCart().updateQuantity(databaseFetcher.getMediaItemByName(media.getTitle()), qty);
+						customer.getCart().addItem(databaseFetcher.getMediaItemByName(media.getTitle()), qty);
+						//customer.getCart().updateQuantity(databaseFetcher.getMediaItemByName(media.getTitle()), qty);
 						databaseFetcher.updateShoppingCartFile(Integer.toString(currentUser.getUserID()), databaseFetcher.getMediaItemByName(media.getTitle()).getMediaID() ,qty);
 					}
 			
@@ -1863,11 +1868,12 @@ public class UserInterfaceMenu {
 
 	public void getChoicePlatform(MediaItem media)
 	{
+		//String gets customers name and title of the game
 		String infoString = currentUser.getUsername() + ",";
 		infoString += media.getTitle() + ",";
 		boolean platform=false;
 		Object[] formats = media.getFormat().split(":");
-		
+		//get all formats for the game (Ps4 xbox etc)
 		Object[] formatz= new Object[formats.length+1];
 		for(int i=0; i<formats.length; i++)
 		{
@@ -1877,14 +1883,12 @@ public class UserInterfaceMenu {
 		
 		String choice4= (String) JOptionPane.showInputDialog(null, "Choose Platform", "Customer : " + currentUser.getName(), 1 , null, formatz, formatz[0]);
 		if(!choice4.equals("Cancel"))
-		{	
+		{
 			String returnChoice= infoString + choice4 + ","; 
 			platform=true;
+			//get rid of bool
 			invoker.setCommand(new CF_ChoosePlatformCommand(new PlatformChoice()));
 			invoker.optionSelectedWithStringParam(returnChoice);
-			
-			
 		}
 	}
-	
 }

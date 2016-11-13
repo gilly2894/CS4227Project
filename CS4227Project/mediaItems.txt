@@ -4,3 +4,4 @@ Game,6614,The Last of Us,Naughty Dog,Action-Adventure,Old,35.0,description,5.0,p
 Album,3834,Aha Shake Heartbreak,Kings of Leon,Rock,Old,3.0,description,3.5,.mp3
 Game,4353,Red Dead,Rockstar,Western,New,35.0,description,5.0,ps4:xbox
 Film,8648,King Kong,Peter Jackson,Action,Old,7.0,description,4.5,.mp4
+Album,3117,Blonde,Frank Ocean,RnB,New Release,11.0,description,4.0,.mp3

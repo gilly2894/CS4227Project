@@ -464,6 +464,7 @@ UserFactory userFactory = new UserFactory();
 		
 		public void addItemFromSuppier(MediaItem media) throws IOException
 		{
+			//TODO! must remove the JOptionPanes and put them in UI
 			boolean itemDuplicate = false;
 			in = new Scanner(mediaItemsFile);
 			String lineFromFile;
@@ -471,9 +472,10 @@ UserFactory userFactory = new UserFactory();
 			{
 				lineFromFile = in.nextLine();
 				String[] arr = lineFromFile.split(",");
-				if(media.getTitle().equals(arr[1]))
+				if(media.getMediaID().equals(arr[1]))
 				{
 					itemDuplicate = true;
+					JOptionPane.showMessageDialog(null, media.getTitle() +" is already in catalogue!", "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 			if(!itemDuplicate)
@@ -488,6 +490,7 @@ UserFactory userFactory = new UserFactory();
 					bw.write(linesFromMediaItemsFile.get(i));
 					bw.newLine();
 				}
+				JOptionPane.showMessageDialog(null, media.getTitle()+ " added to our catalogue");
 				bw.close();
 				fw.close();
 			}

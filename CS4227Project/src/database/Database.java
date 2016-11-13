@@ -94,9 +94,7 @@ UserFactory userFactory = new UserFactory();
 				String type = lineFromFile.substring(0, lineFromFile.indexOf(","));
 				user = TypeOfFactoryGenerator.getFactory("USER").getUser(type);
 				user.createUser(lineFromFile);
-				if(user instanceof CustomerClass){
-					((CustomerClass)user).setCart(initializeUsersShoppingCart(Integer.toString(user.getUserID())));
-				}
+			
 				usersList.add(user);
 			}
 		}

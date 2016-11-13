@@ -9,6 +9,7 @@ import java.util.Scanner;
 import database.Database;
 import media.FilmClass;
 import media.MediaItem;
+import media.ShoppingCart;
 import users.UserClass;
 
 public class DatabaseFetcher {
@@ -120,6 +121,10 @@ public class DatabaseFetcher {
 
 	public void updateOnlineRepository(String userID, HashMap<MediaItem, String> cartList) throws IOException {
 		database.addToRepository(userID,cartList);
+	}
+
+	public ShoppingCart initializeUsersShoppingCart(String userID) throws FileNotFoundException {
+		return database.initializeUsersShoppingCart(userID);
 	}
 
 }

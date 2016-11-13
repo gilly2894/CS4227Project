@@ -203,6 +203,7 @@ public class UserInterfaceMenu {
 		if(type.equalsIgnoreCase("Customer"))
 		{
 			CustomerClass customer = ((CustomerClass)currentUser);
+			customer.setCart(databaseFetcher.initializeUsersShoppingCart(Integer.toString(customer.getUserID())));
 			while(stillLoggedIn)
 			{
 				// this shows the Customer dropdown menu and returns the selection from it
@@ -294,13 +295,13 @@ public class UserInterfaceMenu {
 					// gets shopping cart from user and gets list of cart Items
 					// stored in hashmap in form of Media,Quantity
 					Map<MediaItem, String> cartList = customer.getCart().getCartList();
-					System.out.println(cartList + "here");
 					Object[] choices = { "Display Items", "Delete Items", "Change Quantity of an Item", "Checkout",
 							"Clear Shopping Cart", "Quit" };
 					String choice = (String) JOptionPane.showInputDialog(null, "Shopping Cart Menu!", "", 1, null,
 							choices, choices[0]);
 					// userMenu.userActions(returnedSelection, choice);
 					if (choice.equals("Display Items")) {
+						cartList = customer.getCart().getCartList();
 						int i = 0;
 						Object[] fullListToDisplay = new Object[cartList.size() + 1];
 						for (Map.Entry<MediaItem, String> entry : cartList.entrySet()) {
@@ -314,6 +315,7 @@ public class UserInterfaceMenu {
 					}
 
 					else if (choice.equals("Delete Items")) {
+						cartList = customer.getCart().getCartList();
 						boolean done = false;
 						do {
 							int i = 0;
@@ -339,6 +341,7 @@ public class UserInterfaceMenu {
 					}
 
 					else if (choice.equals("Change Quantity of an Item")) {
+						cartList = customer.getCart().getCartList();
 						String qty;
 						int i = 0;
 						Object[] fullListToDisplay = new Object[cartList.size() + 1];
@@ -405,7 +408,7 @@ public class UserInterfaceMenu {
 
 						JFrame frame = new JFrame();
 
-						Object stringArray[] = { "Ship All Item to my Address", "Add to Repository", "Cancel" };
+						Object stringArray[] = { "Ship All Items to my Address", "Add to Repository", "Cancel" };
 						int response = JOptionPane.showOptionDialog(frame,
 								"Games can only be shipped to registered Address!\nWould you like to add the other items to your repository or have them shipped?",
 								"Select an Option", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
@@ -1711,7 +1714,63 @@ public class UserInterfaceMenu {
 			}
 		}
 		else if(opt.equalsIgnoreCase("Add To Cart"))
-		{
+		{		CustomerClass customer = ((CustomerClass)currentUser);
+					String qty;
+					//checkl if the item exists.
+					
+					if(((CustomerClass) currentUser).getCart().checkIfItemExists(databaseFetcher.getMediaItemByName(media.getTitle())))
+					{
+						int response = JOptionPane.showConfirmDialog(null, "The Item already exists in your basket. Do you want to change the quantity?", "Confirm",
+						        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+						    if (response == JOptionPane.NO_OPTION) {
+						    } else if (response == JOptionPane.YES_OPTION) {
+						    	boolean valid = false;
+						    	do{
+						    	qty = (String) JOptionPane.showInputDialog(null, "What quantity would you like?");
+						    	//gets qty, chnage to int
+						    	if(Integer.parseInt(qty) < 0 ){
+						    		JOptionPane.showMessageDialog(null,
+										    "You cannot enter a quantity less than 0!",
+										    "Quantity Input Error",
+										    JOptionPane.ERROR_MESSAGE);
+						    	}
+						    	
+						    	else if(Integer.parseInt(qty) == 0){
+						    		response = JOptionPane.showConfirmDialog(null, "This will remove the Item from your shopping cart. Do you wish to continue?", "Confirm",
+									        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+						    		if (response == JOptionPane.NO_OPTION) {
+									      valid = false;
+									    }
+						    		else if (response == JOptionPane.YES_OPTION){
+						    			customer.getCart().removeItem(databaseFetcher.getMediaItemByName(media.getTitle()));
+						    			valid = true;
+						    		}
+						    		else
+						    			valid = false;
+						    	}
+						    	else{
+						    		valid = true;
+						    	}
+						    	}while(!valid);
+						    	customer.getCart().updateQuantity(databaseFetcher.getMediaItemByName(media.getTitle()), qty);
+						    	databaseFetcher.updateShoppingCartFile(Integer.toString(currentUser.getUserID()), media.getMediaID() ,qty);
+				    			
+						    }
+						    else if (response == JOptionPane.CLOSED_OPTION) {
+						    }
+					}
+					else
+					{
+						qty = (String) JOptionPane.showInputDialog(null, "How many would you like to add?");
+						//need to check for qantity is valid
+						customer.getCart().updateQuantity(databaseFetcher.getMediaItemByName(media.getTitle()), qty);
+						databaseFetcher.updateShoppingCartFile(Integer.toString(currentUser.getUserID()), databaseFetcher.getMediaItemByName(media.getTitle()).getMediaID() ,qty);
+					}
+			
+			
+			
+			
+			
 			boolean platform=false;
 			// TODO! invoker code here for add to cart functionality 
 			if(media.getMediaType().equalsIgnoreCase("GAME"))

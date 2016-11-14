@@ -641,6 +641,7 @@ UserFactory userFactory = new UserFactory();
 				        	aLineFromFile += "," + itemID + "," + qty;
 				        }
 				    }
+				    
 				    linesFromShoppingCartFile.add(aLineFromFile);
 				}
 			

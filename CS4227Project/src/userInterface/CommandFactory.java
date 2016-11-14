@@ -28,6 +28,8 @@ public class CommandFactory implements I_AbstractFactory {
 			return new CF_AddFundsToWalletCommand();
 		else if(commandType.equalsIgnoreCase("CF_BuyMediaItemCommand"))
 			return new CF_BuyMediaItemCommand();
+		else if(commandType.equalsIgnoreCase("CF_CheckoutShoppingCartCommand"))
+			return new CF_CheckoutShoppingCartCommand();
 		else if(commandType.equalsIgnoreCase("CF_ChoosePlatformCommand"))
 			return new CF_ChoosePlatformCommand();
 		else if(commandType.equalsIgnoreCase("CF_StreamMediaCommand"))

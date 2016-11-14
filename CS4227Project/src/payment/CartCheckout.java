@@ -38,7 +38,7 @@ public class CartCheckout implements I_Receiver {
 		double oldBalance= Double.parseDouble(cust.getBalance());
 		double price = cart.getTotalCost();
 		double newBalance= oldBalance-price;
-		
+		boolean printReceipt = false;
 		if((newBalance>=0.0) || paymentOption.equals("Credit Card")) //both cases mean their payment is valid
 		{
 					// TRYS TO ADD TO ONLINE REPOSITORY
@@ -54,19 +54,31 @@ public class CartCheckout implements I_Receiver {
 				logPaymentSuccessOrFailure(Integer.toString(cust.getUserID()), message, true); //interceptor method??
 				
 					receipt= new WalletDecorator(receipt); //receipt decorated to show that the customer paid by wallet
+					printReceipt = true;
+					database.updateUsers();
 				}
 				
 				else if(paymentOption.equalsIgnoreCase("Credit Card"))
 				{	
 					receipt= new CreditCardDecorator(receipt); //receipt decorated to show that the customer paid by credit card
+					printReceipt = true;
 				}
 				
-				userInterface.UserInterfaceMenu execut = new UserInterfaceMenu(); //call to user interface
-				execut.displayReceipt(username,receipt); //displayReceipt method of UI is called which implements the PrintReceipt() method and prints out all the decorators that are dynamically bound to the Receipt
+				if(printReceipt)
+				{	
+					userInterface.UserInterfaceMenu execut = new UserInterfaceMenu(); //call to user interface
+					execut.displayReceipt(username,receipt); //displayReceipt method of UI is called which implements the PrintReceipt() method and prints out all the decorators that are dynamically bound to the Receipt
+				
+				}
+				
 			
+				cust.getCart().clearCart();
+				// must clear the cart afterwards
+				database.clearUsersCart(Integer.toString(cust.getUserID()));
 					
 					// THIS UPDATES USERS.TXT WITH THE NEW BALANCE FOR CUSTOMER
-				database.updateUsers(); //refresh users so that their new wallet balance is updated to the text file
+				
+				 //refresh users so that their new wallet balance is updated to the text file
 		}
 		else
 		{

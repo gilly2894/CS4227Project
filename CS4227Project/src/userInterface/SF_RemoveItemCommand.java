@@ -2,15 +2,18 @@ package userInterface;
 
 import java.io.IOException;
 
+import program.I_Receiver;
 import users.C_StaffActions;
 
-public class RemoveItemCommand implements I_Command  
+public class SF_RemoveItemCommand implements I_Command  
 {
 	//receiver
 	C_StaffActions staffActions;
 	
-	public RemoveItemCommand(C_StaffActions c_StaffActions) {
-		this.staffActions = c_StaffActions;
+	@Override
+	public I_Command setConcreteCommand(I_Receiver receiver) {
+		this.staffActions = (C_StaffActions) receiver;
+		return this;
 	}
 
 

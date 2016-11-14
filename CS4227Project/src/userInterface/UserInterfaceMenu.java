@@ -14,6 +14,7 @@ import media.GameClass;
 import media.MediaItem;
 import media.PlatformChoice;
 import program.DatabaseFetcher;
+import program.I_Receiver;
 import program.TypeOfFactoryGenerator;
 import streaming.StreamMedia;
 import users.C_AdminActions;
@@ -35,8 +36,10 @@ public class UserInterfaceMenu {
     Originator originator = new Originator();
     Caretaker careTaker = new Caretaker();
     int numberOfStates = 0, currentState = 0;
-	// receivers
-	
+    
+	// concrete Command and Receiver
+	String concreteCommandName = null;
+	String concreteReceiverName = null;
 	
 	
 	// Menus
@@ -383,8 +386,10 @@ public class UserInterfaceMenu {
 					String chosenMediaItemName = viewCustomersMediaRepository(userID);
 					if(!chosenMediaItemName.equals("Cancel"))
 					{	
-						invoker.setCommand(new CF_StreamMediaCommand(new StreamMedia()));
-						invoker.optionSelectedWithStringParam(chosenMediaItemName);
+						concreteCommandName = "CF_StreamMediaCommand";
+						concreteReceiverName = "StreamMedia";
+						executeInvoker(chosenMediaItemName, concreteCommandName, concreteReceiverName);
+						
 					}
 				}
 				else if(returnedMenuSelection.equalsIgnoreCase("Add Funds to Wallet"))
@@ -399,8 +404,10 @@ public class UserInterfaceMenu {
 						if(confirmation!= "Cancel")
 						{
 							String id_amount= username + "," + ammount;
-							invoker.setCommand(new CF_AddFundsToWalletCommand(new AddToWallet()));
-							invoker.optionSelectedWithStringParam(id_amount);
+							
+							concreteCommandName = "CF_AddFundsToWalletCommand";
+							concreteReceiverName = "AddToWallet";
+							executeInvoker(id_amount, concreteCommandName, concreteReceiverName);
 						}
 					}
 					
@@ -441,8 +448,9 @@ public class UserInterfaceMenu {
 			// calls the method to get the user input for a new user
 			String userToCreate = addNewUser();
 			
-			invoker.setCommand(new AF_AddNewUserCommand(new C_AdminActions()));
-			invoker.optionSelectedWithStringParam(userToCreate);
+			concreteCommandName = "AF_AddNewUserCommand";
+			concreteReceiverName = "C_AdminActions";
+			executeInvoker(userToCreate, concreteCommandName, concreteReceiverName);
 		
 		}
 		
@@ -451,8 +459,10 @@ public class UserInterfaceMenu {
 			// calls the method to get the name of the user you want to delete
 			String userToRemove = UserToRemove();
 			
-			invoker.setCommand(new AF_RemoveUserCommand(new C_AdminActions()));
-			invoker.optionSelectedWithStringParam(userToRemove);
+			concreteCommandName = "AF_RemoveUserCommand";
+			concreteReceiverName = "C_AdminActions";
+			executeInvoker(userToRemove, concreteCommandName, concreteReceiverName);
+			
 		}
 		
 		else if(menuSelection.equalsIgnoreCase("Update User"))
@@ -460,8 +470,10 @@ public class UserInterfaceMenu {
 			//  calls the method to get the user to be updated, what part is being updated, and the new value
 			String updateUser = UserToUpdate();
 			
-			invoker.setCommand(new AF_UpdateUserCommand(new C_AdminActions()));
-			invoker.optionSelectedWithStringParam(updateUser);
+			concreteCommandName = "AF_UpdateUserCommand";
+			concreteReceiverName = "C_AdminActions";
+			executeInvoker(updateUser, concreteCommandName, concreteReceiverName);
+			
 		}
 	}
 	
@@ -510,6 +522,20 @@ public class UserInterfaceMenu {
 		}
 	}
 	
+	
+	/**
+	 * @param paramString
+	 * @param concreteCommandName
+	 * @param concreteReceiverName
+	 */
+	private void executeInvoker(String paramString, String concreteCommandName, String concreteReceiverName) {
+		System.out.println("ParamString : " + paramString + "\nCommand : " + concreteCommandName + "\nReceiver : " + concreteReceiverName);
+		I_Command concreteCommand = TypeOfFactoryGenerator.getFactory("COMMAND").getCommand(concreteCommandName);
+		I_Receiver concreteReceiver = TypeOfFactoryGenerator.getFactory("RECEIVER").getReceiver(concreteReceiverName);
+		invoker.setCommand(concreteCommand.setConcreteCommand(concreteReceiver));
+		invoker.optionSelectedWithStringParam(paramString);
+	}
+	
 	/**
 	 * @param media
 	 * @return
@@ -530,8 +556,10 @@ public class UserInterfaceMenu {
 					originator.setState(media.toFileString());
 					returnString+= ItemToUpdate();
 
-					invoker.setCommand(new UpdateItemCommand(new C_StaffActions()));
-					invoker.optionSelectedWithStringParam(returnString);
+					concreteCommandName = "SF_UpdateItemCommand";
+					concreteReceiverName = "C_StaffActions";
+					executeInvoker(returnString, concreteCommandName, concreteReceiverName);
+					
 					careTaker.addMemento(originator.saveStateToMemento());
 					numberOfStates++;
 					currentState++;
@@ -540,8 +568,11 @@ public class UserInterfaceMenu {
 				//browse
 				else if(choice.equals("Remove"))
 				{
-					invoker.setCommand(new RemoveItemCommand(new C_StaffActions()));
-					invoker.optionSelectedWithStringParam(returnString);
+					concreteCommandName = "SF_RemoveItemCommand";
+					concreteReceiverName = "C_StaffActions";
+					executeInvoker(returnString, concreteCommandName, concreteReceiverName);
+					
+
 					viewing = false;
 				}
 				else if (choice.equals("Undo"))
@@ -550,8 +581,11 @@ public class UserInterfaceMenu {
 					{
 						currentState--;
 						String oldState = originator.restoreFromMemento(careTaker.getMemento(currentState));
-						invoker.setCommand(new UndoCommand(new C_StaffActions()));
-						invoker.optionSelectedWithStringParam(oldState);
+						
+						concreteCommandName = "SF_UndoCommand";
+						concreteReceiverName = "C_StaffActions";
+						executeInvoker(oldState, concreteCommandName, concreteReceiverName);
+						
 					}
 					else
 					{
@@ -564,8 +598,11 @@ public class UserInterfaceMenu {
 					{
 						currentState++;
 						String redoState = originator.restoreFromMemento(careTaker.getMemento(currentState));
-						invoker.setCommand(new UndoCommand(new C_StaffActions()));
-						invoker.optionSelectedWithStringParam(redoState);
+						
+						concreteCommandName = "SF_UndoCommand";
+						concreteReceiverName = "C_StaffActions";
+						executeInvoker(redoState, concreteCommandName, concreteReceiverName);
+						
 					}
 					else
 					{
@@ -597,8 +634,10 @@ public class UserInterfaceMenu {
 				{
 					if (choice.equals("Add to Catalogue"))
 					{
-						invoker.setCommand(new AddItemCommand(new C_StaffActions()));
-						invoker.optionSelectedWithStringParam(returnString);
+						concreteCommandName = "SF_AddItemCommand";
+						concreteReceiverName = "C_StaffActions";
+						executeInvoker(returnString, concreteCommandName, concreteReceiverName);
+						
 					}
 					else if (choice.equals("Return to Menu"))
 					{
@@ -1142,7 +1181,7 @@ public class UserInterfaceMenu {
 	}
 	
 	public String showStaffMenu() {
-		Object [] selection = {"View Catalogue", "View Supplier Catalogue", "Search Media Item", "Add Promotion", "Logout"};
+		Object [] selection = {"View Catalogue", "Search Media Item", "Logout"};
 		return (String) JOptionPane.showInputDialog(null, "What action would you like to perform?","Staff Member : " + currentUser.getName(), 1 , null, selection, selection[0]);
 	}
 	
@@ -1320,8 +1359,9 @@ public class UserInterfaceMenu {
 				{
 					infoString += paymentChoice;
 				
-					invoker.setCommand(new CF_BuyMediaItemCommand(new Payment()));
-					invoker.optionSelectedWithStringParam(infoString);
+					concreteCommandName = "CF_BuyMediaItemCommand";
+					concreteReceiverName = "Payment";
+					executeInvoker(infoString, concreteCommandName, concreteReceiverName);
 				
 				}
 			}
@@ -1500,8 +1540,9 @@ public class UserInterfaceMenu {
 			String returnChoice= infoString + choice4 + ","; 
 			platform=true;
 			//get rid of bool
-			invoker.setCommand(new CF_ChoosePlatformCommand(new PlatformChoice()));
-			invoker.optionSelectedWithStringParam(returnChoice);
+			concreteCommandName = "CF_ChoosePlatformCommand";
+			concreteReceiverName = "PlatformChoice";
+			executeInvoker(returnChoice, concreteCommandName, concreteReceiverName);
 		}
 	}
 }

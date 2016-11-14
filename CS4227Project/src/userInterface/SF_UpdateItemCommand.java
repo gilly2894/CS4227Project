@@ -2,23 +2,25 @@ package userInterface;
 
 import java.io.IOException;
 
+import program.I_Receiver;
 import users.C_StaffActions;
 
-public class AddItemCommand implements I_Command 
+public class SF_UpdateItemCommand implements I_Command 
 {
 
-	//receiver
 	C_StaffActions staffActions;
 	
-	public AddItemCommand(C_StaffActions c_StaffActions)
-	{
-		this.staffActions = c_StaffActions;
+	@Override
+	public I_Command setConcreteCommand(I_Receiver receiver) {
+		this.staffActions = (C_StaffActions) receiver;
+		return this;
 	}
-
+	
 	@Override
 	public void execute() 
 	{
-		
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -26,17 +28,13 @@ public class AddItemCommand implements I_Command
 	{
 		try 
 		{
-			staffActions.addItem(infoString);
+			staffActions.updateItem(infoString);
 		} 
 		catch (IOException e) 
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 	}
 
 }
-
-
-

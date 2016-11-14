@@ -4,8 +4,9 @@ import java.io.IOException;
 
 import database.Database;
 import media.MediaItem;
+import program.I_Receiver;
 
-public class StreamMedia {
+public class StreamMedia implements I_Receiver {
 	
 	Database databaseInstance = Database.getInstance();
 	public void stream(String mediaName) throws IOException {

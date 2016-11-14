@@ -2,9 +2,10 @@ package users;
 
 import java.io.IOException;
 
+import program.I_Receiver;
 import program.TypeOfFactoryGenerator;
 
-public class C_AdminActions implements I_UserActions
+public class C_AdminActions implements I_UserActions, I_Receiver
 {
 	UserFactory userFactory = new UserFactory();
 	public void userActions(String dropdownSelection, String returnedString) throws IOException 

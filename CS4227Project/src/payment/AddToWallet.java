@@ -4,9 +4,10 @@ import java.io.IOException;
 
 import userInterface.UserInterfaceMenu;
 import database.Database;
+import program.I_Receiver;
 import users.*;
 
-public class AddToWallet {
+public class AddToWallet implements I_Receiver {
 	
 	Database database= Database.getInstance();
 	public void wallet(String userID_amount) throws IOException

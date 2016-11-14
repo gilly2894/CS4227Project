@@ -3,15 +3,19 @@ package userInterface;
 import java.io.IOException;
 
 import media.PlatformChoice;
+import program.I_Receiver;
 
 public class CF_ChoosePlatformCommand implements I_Command {
 
 	PlatformChoice pChoice= new PlatformChoice();
 	
-	public CF_ChoosePlatformCommand(PlatformChoice pChoice)
-	{
-		this.pChoice=pChoice;
+	
+	@Override
+	public I_Command setConcreteCommand(I_Receiver receiver) {
+		this.pChoice=(PlatformChoice) receiver;
+		return this;
 	}
+	
 	@Override
 	public void execute() {
 		// TODO Auto-generated method stub
@@ -29,5 +33,6 @@ public class CF_ChoosePlatformCommand implements I_Command {
 		// TODO Auto-generated method stub
 
 	}
+	
 
 }

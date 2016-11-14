@@ -1,6 +1,8 @@
 package program;
 
 import media.MediaFactory;
+import userInterface.CommandFactory;
+import userInterface.ReceiverFactory;
 import users.UserFactory;
 
 public class TypeOfFactoryGenerator {
@@ -12,6 +14,10 @@ public class TypeOfFactoryGenerator {
 			return new UserFactory();
 		else if(factoryType.equalsIgnoreCase("MEDIA"))
 			return new MediaFactory();
+		else if(factoryType.equalsIgnoreCase("COMMAND"))
+			return new CommandFactory();
+		else if(factoryType.equalsIgnoreCase("RECEIVER"))
+			return new ReceiverFactory();
 		
 		return null;
 	}

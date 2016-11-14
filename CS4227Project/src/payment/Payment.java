@@ -8,11 +8,12 @@ import interceptor.dispatchers.ClientRequestDispatcher;
 import media.GameClass;
 import media.MediaItem;
 import media.PlatformChoice;
+import program.I_Receiver;
 import userInterface.UserInterfaceMenu;
 import users.CustomerClass;
 import users.UserClass;
 
-public class Payment {
+public class Payment implements I_Receiver {
 	
 	Database database = Database.getInstance();
 

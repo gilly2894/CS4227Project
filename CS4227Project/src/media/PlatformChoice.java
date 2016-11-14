@@ -3,8 +3,9 @@ package media;
 import java.io.IOException;
 
 import database.Database;
+import program.I_Receiver;
 
-public class PlatformChoice {
+public class PlatformChoice implements I_Receiver {
 	
 	Database database = Database.getInstance();
 	

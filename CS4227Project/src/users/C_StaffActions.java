@@ -4,9 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import media.FilmClass;
 import media.MediaItem;
+import program.I_Receiver;
 import program.TypeOfFactoryGenerator;
 
-public class C_StaffActions implements I_UserActions {
+public class C_StaffActions implements I_UserActions, I_Receiver {
 
 	UserFactory userFactory = new UserFactory();
 	public void userActions(String dropdownSelection, String returnedString) throws IOException {

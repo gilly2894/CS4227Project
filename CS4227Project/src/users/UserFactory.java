@@ -1,6 +1,8 @@
 package users;
 
 import program.I_AbstractFactory;
+import program.I_Receiver;
+import userInterface.I_Command;
 import media.MediaItem;
 
 public class UserFactory implements I_AbstractFactory{
@@ -23,6 +25,18 @@ public class UserFactory implements I_AbstractFactory{
 	@Override
 	public MediaItem getMediaItem(String mediaItemType)
 	{
+		return null;
+	}
+
+	@Override
+	public I_Command getCommand(String commandType) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public I_Receiver getReceiver(String receiverType) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 }

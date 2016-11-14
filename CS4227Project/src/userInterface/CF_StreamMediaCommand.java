@@ -2,14 +2,18 @@ package userInterface;
 
 import java.io.IOException;
 
+import program.I_Receiver;
 import streaming.StreamMedia;
 
 public class CF_StreamMediaCommand implements I_Command {
 
 StreamMedia streamMedia = new StreamMedia();
 	
-	public CF_StreamMediaCommand(StreamMedia streamMedia) {
-		this.streamMedia = streamMedia;
+	
+	@Override
+	public I_Command setConcreteCommand(I_Receiver receiver) {
+		this.streamMedia = (StreamMedia) receiver;
+		return this;
 	}
 	
 	@Override
@@ -28,5 +32,7 @@ StreamMedia streamMedia = new StreamMedia();
 		}
 
 	}
+
+	
 
 }

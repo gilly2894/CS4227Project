@@ -2,19 +2,21 @@ package userInterface;
 
 import java.io.IOException;
 
-import payment.AddToWallet;
 import program.I_Receiver;
+import users.C_StaffActions;
 
-public class CF_AddFundsToWalletCommand implements I_Command {
+public class SF_AddItemCommand implements I_Command {
 
-	AddToWallet addToWallet = new AddToWallet();
+	//receiver
+	C_StaffActions staffActions;
+		
 	
 	@Override
 	public I_Command setConcreteCommand(I_Receiver receiver) {
-		this.addToWallet = (AddToWallet) receiver;
+		this.staffActions = (C_StaffActions) receiver;
 		return this;
 	}
-	
+
 	@Override
 	public void execute() {
 		// TODO Auto-generated method stub
@@ -23,15 +25,15 @@ public class CF_AddFundsToWalletCommand implements I_Command {
 
 	@Override
 	public void execute(String infoString) {
-		try {
-			addToWallet.wallet(infoString);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		try
+		{
+			staffActions.addItem(infoString);
+		}
+		catch (IOException e) 
+		{
 			e.printStackTrace();
 		}
 
 	}
-
-	
 
 }

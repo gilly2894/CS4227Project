@@ -25,7 +25,8 @@ public class Payment implements I_Receiver {
 		String username = arr[0];
 		String mediaTitle = arr[1];
 		String purchaseType = arr[2];
-		String paymentOption = arr[3];                
+		String paymentOption = arr[3];
+		String checkout = arr[4];
 		I_Receipt receipt= new ReceiptA();	//receipt object created
 		
 		UserClass customer= database.getUserByName(username);

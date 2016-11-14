@@ -1,5 +1,7 @@
 package payment;
 
+import java.io.FileNotFoundException;
+
 public class CreditCardDecorator extends ReceiptDecorator {
 
 	public CreditCardDecorator(I_Receipt decoratedReceipt) {
@@ -7,7 +9,7 @@ public class CreditCardDecorator extends ReceiptDecorator {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public String PrintReceipt(String media)
+	public String PrintReceipt(String media) throws FileNotFoundException
 	{
 		String credit= "You successfully paid by credit card \n";
 		return decoratedReceipt.PrintReceipt(media) + credit; 

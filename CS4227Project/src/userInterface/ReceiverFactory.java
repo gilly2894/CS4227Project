@@ -2,7 +2,7 @@ package userInterface;
 
 import media.MediaItem;
 import media.PlatformChoice;
-import payment.AddToWallet;
+import payment.*;
 import payment.Payment;
 import program.I_AbstractFactory;
 import program.I_Receiver;
@@ -30,6 +30,9 @@ public class ReceiverFactory implements I_AbstractFactory {
 			return new PlatformChoice();
 		else if(receiverType.equalsIgnoreCase("Payment"))
 			return new Payment();
+		else if(receiverType.equalsIgnoreCase("CartCheckout"))
+			return new CartCheckout();
+		
 		
 		
 		return null;

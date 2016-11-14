@@ -78,6 +78,9 @@ public class UserInterfaceMenu {
 		{
 			String userName = "";
 			userName = getUsernameInput();
+			//just for testing!!
+			userName = "username";
+			
 			if(userName.equalsIgnoreCase("Exit"))
 			{
 				return;
@@ -87,7 +90,8 @@ public class UserInterfaceMenu {
 			{
 				
 				String password = getPasswordInput();
-				if((userSignIn.getPassword()).equals(password))
+				//if((userSignIn.getPassword()).equals(password))
+				if(true)
 				{
 					currentUser = userSignIn;
 					loggedIn = true;
@@ -310,9 +314,9 @@ public class UserInterfaceMenu {
 							}
 						} while (!valid);
 
-						customer.getCart().updateQuantity(databaseFetcher.getMediaItemByName(choice), qty);
+						customer.getCart().updateQuantity(customer.getCart().getMediaItemByName(choice), qty);
 						databaseFetcher.updateShoppingCartFile(Integer.toString(currentUser.getUserID()),
-								databaseFetcher.getMediaItemByName(choice).getMediaID(), qty);
+								customer.getCart().getMediaItemByName(choice).getMediaID(), qty);
 					}
 
 					else if (choice.equals("Checkout")) {
@@ -329,34 +333,32 @@ public class UserInterfaceMenu {
 
 						JFrame frame = new JFrame();
 
-						Object stringArray[] = { "Ship All Items to my Address", "Add to Repository", "Cancel" };
+						Object stringArray[] = { "Ship to Address", "Cancel" };
 						int response = JOptionPane.showOptionDialog(frame,
-								"Games can only be shipped to registered Address!\nWould you like to add the other items to your repository or have them shipped?",
+								"All Items will be shipped to registered Address!",
 								"Select an Option", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
 								stringArray, stringArray[0]);
 
 						if (response == 0) {
 							// ship all items to address
-							if (customer.purchase(customer.getCart().getTotalCost())) {
-								// get payment and receipt
-								customer.getCart().clearCart();
-								// must clear the cart afterwards
-								databaseFetcher.clearUsersCart(Integer.toString(currentUser.getUserID()));
-							} else {
-								JOptionPane.showMessageDialog(null,
-										"You don't have sufficient funds!! Current Balance:  € "
-												+ customer.getBalance());
+							{
+								String infoString = customer.getUsername()+","+customer.getUserID()+","+"Ship to Address"+",";
+								
+									//TODO! take out this choice : don't use Credit card anymore
+									String paymentChoice = paymentMethod();
+									if(!paymentChoice.equals("Cancel"))
+									{
+										infoString += paymentChoice;
+										
+										concreteCommandName = "CF_CheckoutShoppingCartCommand";
+										concreteReceiverName = "CartCheckout";
+										executeInvoker(infoString, concreteCommandName, concreteReceiverName);
+										
+										customer.getCart().clearCart();
+										// must clear the cart afterwards
+										databaseFetcher.clearUsersCart(Integer.toString(currentUser.getUserID()));
+									}
 							}
-						} else if (response == 1) {
-							JOptionPane.showMessageDialog(null,
-									"If you add to the repository, you only need one quantity! New price: €"
-											+ customer.getCart().getSingleQuantityPrice());
-							databaseFetcher.updateOnlineRepository(Integer.toString(customer.getUserID()),
-									customer.getCart().getCartList());
-							customer.getCart().clearCart();
-							// must clear the cart afterwards
-							databaseFetcher.clearUsersCart(Integer.toString(currentUser.getUserID()));
-
 						} else if (response == JOptionPane.CLOSED_OPTION || response == 2) {
 							break;
 						}
@@ -410,8 +412,6 @@ public class UserInterfaceMenu {
 							executeInvoker(id_amount, concreteCommandName, concreteReceiverName);
 						}
 					}
-					
-					
 				}
 				
 				else if(returnedMenuSelection.equalsIgnoreCase("View Profile"))
@@ -1358,11 +1358,10 @@ public class UserInterfaceMenu {
 				if(!paymentChoice.equals("Cancel"))
 				{
 					infoString += paymentChoice;
-				
+			
 					concreteCommandName = "CF_BuyMediaItemCommand";
 					concreteReceiverName = "Payment";
 					executeInvoker(infoString, concreteCommandName, concreteReceiverName);
-				
 				}
 			}
 		}
@@ -1371,10 +1370,11 @@ public class UserInterfaceMenu {
 					String qty;
 					//checkl if the item exists.
 					
-					if(((CustomerClass) currentUser).getCart().checkIfItemExists(databaseFetcher.getMediaItemByName(media.getTitle())))
+					if(((CustomerClass) currentUser).getCart().checkIfItemExists(media))
 					{
 						int response = JOptionPane.showConfirmDialog(null, "The Item already exists in your basket. Do you want to change the quantity?", "Confirm",
 						        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+						System.out.println(media.getPrice());
 						    if (response == JOptionPane.NO_OPTION) {
 						    } else if (response == JOptionPane.YES_OPTION) {
 						    	boolean valid = false;
@@ -1405,7 +1405,7 @@ public class UserInterfaceMenu {
 						    		valid = true;
 						    	}
 						    	}while(!valid);
-						    	customer.getCart().updateQuantity(databaseFetcher.getMediaItemByName(media.getTitle()), qty);
+						    	customer.getCart().updateQuantity(customer.getCart().getMediaItemByName(media.getTitle()), qty);
 						    	databaseFetcher.updateShoppingCartFile(Integer.toString(currentUser.getUserID()), media.getMediaID() ,qty);
 				    			
 						    }
@@ -1414,34 +1414,37 @@ public class UserInterfaceMenu {
 					}
 					else
 					{
+						MediaItem gameToCart = TypeOfFactoryGenerator.getFactory("MEDIA").getMediaItem("GAME");
+						boolean platform=false;
+						// TODO! invoker code here for add to cart functionality 
 						if(media.getMediaType().equalsIgnoreCase("GAME"))
 						{
 							getChoicePlatform(media);
+							platform= true;
+;							gameToCart = gameToCart.createMediaItem(media.toFileString());
 						}
+
+						if(platform==true)
+						{
+							GameClass item= (GameClass)media;
+							PlatformChoice pChoice= new PlatformChoice();
+							pChoice.nullPLatform(item);
+						}
+						
 						qty = (String) JOptionPane.showInputDialog(null, "How many would you like to add?");
 						//need to check for qantity is valid
-						customer.getCart().addItem(databaseFetcher.getMediaItemByName(media.getTitle()), qty);
-						//customer.getCart().updateQuantity(databaseFetcher.getMediaItemByName(media.getTitle()), qty);
-						databaseFetcher.updateShoppingCartFile(Integer.toString(currentUser.getUserID()), databaseFetcher.getMediaItemByName(media.getTitle()).getMediaID() ,qty);
+						if(gameToCart == null && !(media.getMediaType().equalsIgnoreCase("GAME")))
+						{	
+							customer.getCart().addItem(media, qty);
+							databaseFetcher.updateShoppingCartFile(Integer.toString(currentUser.getUserID()), databaseFetcher.getMediaItemByName(media.getTitle()).getMediaID() ,qty);
+						}
+						else if(gameToCart != null && (media.getMediaType().equalsIgnoreCase("GAME")))
+						{
+							customer.getCart().addItem(gameToCart, qty);
+						databaseFetcher.updateShoppingCartFile(Integer.toString(currentUser.getUserID()), databaseFetcher.getMediaItemByName(gameToCart.getTitle()).getMediaID() ,qty);
+						}
+						
 					}
-			
-			
-			
-			
-			
-			boolean platform=false;
-			// TODO! invoker code here for add to cart functionality 
-			if(media.getMediaType().equalsIgnoreCase("GAME"))
-			{
-				getChoicePlatform(media);
-				platform= true;
-			}
-			if(platform==true)
-			{
-				GameClass item= (GameClass)media;
-				PlatformChoice pChoice= new PlatformChoice();
-				pChoice.nullPLatform(item);
-			}
 		}
 	}
 	
@@ -1505,6 +1508,11 @@ public class UserInterfaceMenu {
 		JOptionPane.showMessageDialog(null,receipt.PrintReceipt(media.getTitle()));
 	}
 	
+	public void displayReceipt(String username,I_Receipt receipt) throws IOException
+	{
+		JOptionPane.showMessageDialog(null,receipt.PrintReceipt(username));
+	}
+	
 	public String amountToAddToWallet()
 	{
 		Object [] selection = {"€100", "€50", "€20", "€10", "Cancel"};
@@ -1524,7 +1532,6 @@ public class UserInterfaceMenu {
 		//String gets customers name and title of the game
 		String infoString = currentUser.getUsername() + ",";
 		infoString += media.getTitle() + ",";
-		boolean platform=false;
 		Object[] formats = media.getFormat().split(":");
 		//get all formats for the game (Ps4 xbox etc)
 		Object[] formatz= new Object[formats.length+1];
@@ -1538,8 +1545,6 @@ public class UserInterfaceMenu {
 		if(!choice4.equals("Cancel"))
 		{
 			String returnChoice= infoString + choice4 + ","; 
-			platform=true;
-			//get rid of bool
 			concreteCommandName = "CF_ChoosePlatformCommand";
 			concreteReceiverName = "PlatformChoice";
 			executeInvoker(returnChoice, concreteCommandName, concreteReceiverName);

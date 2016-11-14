@@ -185,26 +185,14 @@ UserFactory userFactory = new UserFactory();
 		}
 	    
 	    //get shopping cart items
-	    public HashMap<MediaItem, String> getShoppingCart(String userID) throws FileNotFoundException 
+	    public ShoppingCart getShoppingCart(String userID) throws FileNotFoundException 
 	    {
-	    	HashMap <MediaItem, String> cartList = new HashMap<MediaItem, String>();
-	    	MediaItem m;
-	    	in = new Scanner(shoppingCartFile);
-			String aLineFromFile = "";
-			MediaItem mediaItem;
-			while(in.hasNext())
-			{
-				aLineFromFile = in.nextLine();
-				linesFromShoppingCartFile.add(aLineFromFile);
-				String[] components = aLineFromFile.split(",");
-				if(components[0].equals(userID)){
-					for(int i=1; i < components.length; i+= 2){
-						m = getMediaItemByID(components[i]);
-						cartList.put(m, components[i+1]);
-					}
-				}
-			}
-			return cartList;
+	    	for(ShoppingCart c : shoppingCarts){
+	    		if(c.getCartID().equals(userID)){
+	    			return c;
+	    		}
+	    	}
+	    	return null;
 		}
 	    
 	    

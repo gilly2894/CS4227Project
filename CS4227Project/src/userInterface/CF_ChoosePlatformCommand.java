@@ -19,7 +19,6 @@ public class CF_ChoosePlatformCommand implements I_Command {
 	@Override
 	public void execute() {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override

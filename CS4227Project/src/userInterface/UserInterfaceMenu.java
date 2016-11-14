@@ -324,7 +324,7 @@ public class UserInterfaceMenu {
 							+ "\t          €" + entry.getKey().getPrice() + "\n";
 
 						}
-						message += "\nTotal Discount : € " + customer.getCart().getDiscountTotal() + "\nTotal Price is : € " + customer.getCart().getTotalCost();
+						message += "\nTotal Discount : € " + (String.format("%.2f",customer.getCart().getDiscountTotal())) + "\nTotal Price is : € " + customer.getCart().getTotalCost();
 						JOptionPane.showMessageDialog(null, message);
 
 						JFrame frame = new JFrame();

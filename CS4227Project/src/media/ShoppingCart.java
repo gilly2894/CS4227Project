@@ -59,9 +59,11 @@ public class ShoppingCart implements I_Observer{
 	
 	public void updatePrice(MediaItem m)
 	{
+		String qty = cartList.get(m);
 		double discount = (m.getPrice() / 100) * 10;
 		m.setPrice(m.getPrice() - discount);
 		m.notifyObservers();
+		setDiscountTotal(discount * Integer.parseInt(qty));
 		calculateTotalCostWithDiscount();
 	}
 
@@ -142,7 +144,7 @@ public class ShoppingCart implements I_Observer{
 		{ 
 			totalCost += entry.getKey().getPrice() * Integer.parseInt(entry.getValue());
 		}
-		setTotalCost(totalCost - discountTotal);
+		setTotalCost(totalCost);
 	}
 
 

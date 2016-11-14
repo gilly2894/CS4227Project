@@ -210,11 +210,8 @@ public class UserInterfaceMenu {
 				
 				else if(returnedMenuSelection.equalsIgnoreCase("Activate Promotion"))					
 				{	
-					double currentAmt = customer.getCart().getTotalCost();
-					System.out.println("Current Total" + currentAmt);
-					customer.getCart().setDiscountTotal((customer.getCart().getTotalCost() /100) *10);
-					customer.getCart().setTotalCost(currentAmt - customer.getCart().getDiscountTotal());
-					JOptionPane.showMessageDialog(null, "10% discount has been activated");
+					String choice = displayItemsFromCart(customer);		
+					customer.getCart().updatePrice(databaseFetcher.getMediaItemByName(choice));
 				}
 				
 				else if(returnedMenuSelection.equalsIgnoreCase("View Shopping Cart"))					

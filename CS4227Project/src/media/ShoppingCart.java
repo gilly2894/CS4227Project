@@ -56,6 +56,14 @@ public class ShoppingCart implements I_Observer{
 		}
 		calculateTotalCost();
 	}
+	
+	public void updatePrice(MediaItem m)
+	{
+		double discount = (m.getPrice() / 100) * 10;
+		m.setPrice(m.getPrice() - discount);
+		m.notifyObservers();
+		calculateTotalCostWithDiscount();
+	}
 
 	public void viewCartDetails() {
 
@@ -91,10 +99,7 @@ public class ShoppingCart implements I_Observer{
 					
 			}
 	}
-
 	
-	
-
 	public double getTotalCost() {
 		return totalCost;
 	}
@@ -128,6 +133,18 @@ public class ShoppingCart implements I_Observer{
 		}
 		setTotalCost(totalCost);
 	}
+	
+	public void calculateTotalCostWithDiscount()
+	{
+		//loop through cart and add cost of each (item*quantity)
+		totalCost = 0.0;
+		for(Map.Entry<MediaItem, String> entry : cartList.entrySet())
+		{ 
+			totalCost += entry.getKey().getPrice() * Integer.parseInt(entry.getValue());
+		}
+		setTotalCost(totalCost - discountTotal);
+	}
+
 
 	public String getQuantity(MediaItem shoppingItem) {
 		for(Map.Entry<MediaItem, String> entry : cartList.entrySet())

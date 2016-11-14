@@ -55,10 +55,6 @@ public class DatabaseFetcher {
 		return database.getSupplierItems();
 	}
 	
-	public HashMap<MediaItem, String> getShoppingCart(String userID) throws FileNotFoundException
-    {
-    	return database.getShoppingCart(userID);
-	}
 //	public ArrayList<FilmClass> getListOfFilms(String filmListType)
 //	{
 //		ArrayList<FilmClass> filmList=null;

@@ -32,9 +32,19 @@ public class ShoppingCart implements I_Observer{
 	}
 	
 	public void addItem(MediaItem m, String quantity) {
+		System.out.println(m);
 		cartList.put(m, quantity);
 		m.registerObserver(this);
 		calculateTotalCost();
+	}
+	
+	public MediaItem getMediaItemByName(String name){
+		for (Map.Entry<MediaItem, String> entry : cartList.entrySet()) {
+			if(entry.getKey().getTitle().equals(name)){
+				return entry.getKey();
+			}
+		}
+		return null;
 	}
 	
 	public void clearCart() {
@@ -51,7 +61,10 @@ public class ShoppingCart implements I_Observer{
 	public void updateQuantity(MediaItem m, String quantity) {
 		for (Map.Entry<MediaItem, String> entry : cartList.entrySet()) {
 			if(entry.getKey().equals(m)){
-				cartList.put(m, quantity);
+				if(Integer.parseInt(quantity) == 0)
+					cartList.remove(m);
+				else
+					cartList.put(m, quantity);
 			}
 		}
 		calculateTotalCost();

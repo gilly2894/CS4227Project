@@ -30,6 +30,7 @@ public class GameClass extends MediaItem {
 		 {
 				// TODO Auto-generated method stub
 			 	this.setPrice(bundler.bundlePrice(this.getPrice()));
+			 	System.out.println(this.getPrice());
 		}
 	}
 	

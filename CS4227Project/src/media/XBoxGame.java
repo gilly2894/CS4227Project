@@ -12,7 +12,6 @@ public class XBoxGame implements PriceBundler {
 		double bundledPrice= price*1.05;
 		System.out.println("Bundled Xbox Price: " + bundledPrice);	
 		return bundledPrice;
-		
 	}
 	
 	

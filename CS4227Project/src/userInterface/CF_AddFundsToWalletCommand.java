@@ -26,7 +26,6 @@ public class CF_AddFundsToWalletCommand implements I_Command {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 
 }

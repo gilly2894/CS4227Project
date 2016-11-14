@@ -1,5 +1,8 @@
 package payment;
+import java.util.HashMap;
+
 import database.Database;
+import media.MediaItem;
 
 public class ReceiptA implements I_Receipt {
 
@@ -10,7 +13,5 @@ public class ReceiptA implements I_Receipt {
 		return "You paid €" + database.getMediaItemByName(media).getPrice() + " for " + media + "\n";
 		
 	}
-
-	
 	
 }

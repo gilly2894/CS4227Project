@@ -14,6 +14,7 @@ public class PlatformChoice {
 		String username = returnedStrArr[0];
 		String MediaName = returnedStrArr[1];
 		String Platform = returnedStrArr[2];
+		//pass info string and get USERNAME ---MEDIANAME ---PLATFORM type
 		media.GameClass item= (media.GameClass)database.getMediaItemByName(MediaName);
 		if(Platform.equalsIgnoreCase("XBOX"))
 		{
@@ -36,7 +37,6 @@ public class PlatformChoice {
 			item.setBundler(null);
 			
 		}
-			
 	}
 	
 	public void nullPLatform(GameClass item)

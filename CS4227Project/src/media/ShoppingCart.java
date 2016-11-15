@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.swing.JOptionPane;
 
 import media.MediaItem;
+import program.I_Receiver;
 
 public class ShoppingCart implements I_Observer{
 

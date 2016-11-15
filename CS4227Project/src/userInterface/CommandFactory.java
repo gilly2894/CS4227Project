@@ -34,6 +34,10 @@ public class CommandFactory implements I_AbstractFactory {
 			return new CF_ChoosePlatformCommand();
 		else if(commandType.equalsIgnoreCase("CF_StreamMediaCommand"))
 			return new CF_StreamMediaCommand();
+		else if(commandType.equalsIgnoreCase("CF_ChangeQuantityCommand"))
+			return new CF_ChangeQuantityCommand();
+		else if(commandType.equalsIgnoreCase("CF_ClearCartCommand"))
+			return new CF_ClearCartCommand();
 		
 		
 		else if(commandType.equalsIgnoreCase("SF_AddItemCommand"))

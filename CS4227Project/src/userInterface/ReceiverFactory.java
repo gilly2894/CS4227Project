@@ -30,8 +30,8 @@ public class ReceiverFactory implements I_AbstractFactory {
 			return new PlatformChoice();
 		else if(receiverType.equalsIgnoreCase("Payment"))
 			return new Payment();
-		else if(receiverType.equalsIgnoreCase("CartCheckout"))
-			return new CartCheckout();
+		else if(receiverType.equalsIgnoreCase("CartOperation"))
+			return new CartOperation();
 		
 		
 		

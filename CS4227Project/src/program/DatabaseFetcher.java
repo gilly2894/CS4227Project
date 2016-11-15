@@ -123,4 +123,8 @@ public class DatabaseFetcher {
 		return database.initializeUsersShoppingCart(userID);
 	}
 
+	public ShoppingCart getShoppingCart(String string) throws FileNotFoundException {
+		return database.getShoppingCart(string);
+	}
+
 }

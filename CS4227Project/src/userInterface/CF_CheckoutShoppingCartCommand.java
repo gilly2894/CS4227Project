@@ -2,16 +2,16 @@ package userInterface;
 
 import java.io.IOException;
 
-import payment.CartCheckout;
+import payment.CartOperation;
 import program.I_Receiver;
 
 public class CF_CheckoutShoppingCartCommand implements I_Command {
 
-	CartCheckout payment;
+	CartOperation payment;
 		
 		@Override
 		public I_Command setConcreteCommand(I_Receiver receiver) {
-			this.payment=(CartCheckout) receiver;
+			this.payment=(CartOperation) receiver;
 			return this;
 		}
 		

@@ -78,8 +78,6 @@ public class UserInterfaceMenu {
 		{
 			String userName = "";
 			userName = getUsernameInput();
-			//just for testing!!
-			userName = "username";
 			
 			if(userName.equalsIgnoreCase("Exit"))
 			{
@@ -90,8 +88,7 @@ public class UserInterfaceMenu {
 			{
 				
 				String password = getPasswordInput();
-				//if((userSignIn.getPassword()).equals(password))
-				if(true)
+				if((userSignIn.getPassword()).equals(password))
 				{
 					currentUser = userSignIn;
 					loggedIn = true;
@@ -223,29 +220,30 @@ public class UserInterfaceMenu {
 				
 				else if(returnedMenuSelection.equalsIgnoreCase("View Shopping Cart"))					
 				{
-					// gets shopping cart from user and gets list of cart Items
-					// stored in hashmap in form of Media,Quantity
-					Map<MediaItem, String> cartList = customer.getCart().getCartList();
+					
 					String choice = displayShoppingCartMenu();
 					// userMenu.userActions(returnedSelection, choice);
 					if (choice.equals("Display Items")) {
-						
+					
 						String mediaTitle = displayItemsFromCart(customer);
-						// add code for next menu: item selecton for update or deletion
 					}
 
+					
+					//
 					else if (choice.equals("Delete Items")) {
-						cartList = customer.getCart().getCartList();
+						String infoString = "";
 						boolean done = false;
 						do {
-
+							
 							String select = displayItemsFromCart(customer);
 							if(!select.equals("Cancel"))
 							{
-								// select is the movieID of the movie we want to
-								customer.getCart().removeItem(databaseFetcher.getMediaItemByName(select));
-								databaseFetcher.updateShoppingCartFile(Integer.toString(currentUser.getUserID()),
-										databaseFetcher.getMediaItemByName(select).getMediaID(), "0");
+								infoString = currentUser.getUsername() + "," + select + "," + "0";
+								
+								concreteCommandName = "CF_ChangeQuantityCommand";
+								concreteReceiverName = "CartOperation";
+								executeInvoker(infoString, concreteCommandName, concreteReceiverName);
+								
 							}
 							//so, this was going to jsut check if they were done but I'd say I just but in a boolean when implementing it. We're going to find a lot of those
 							// ok cool so this is the method that I have extracted :) i'm gonna just have this one method for browse update qty and delete!
@@ -254,22 +252,10 @@ public class UserInterfaceMenu {
 					}
 
 					else if (choice.equals("Change Quantity of an Item")) {
-						cartList = customer.getCart().getCartList();
 						String qty;
-						/*int i = 0;
-						Object[] fullListToDisplay = new Object[cartList.size() + 1];
-						for (Map.Entry<MediaItem, String> entry : cartList.entrySet()) {
-
-							fullListToDisplay[i] = entry.getKey().getMediaType() + " - " + entry.getKey().getTitle();
-							i++;
-
-						}
-						fullListToDisplay[cartList.size()] = "Cancel";
-						choice = (String) JOptionPane.showInputDialog(null, "Choose Media Item to Change Quantity of",
-								"Customer : " + currentUser.getName(), 1, null, fullListToDisplay,
-								fullListToDisplay[0]);
-						*/
+					
 						choice = displayItemsFromCart(customer);
+						String changeQuantityCommand = choice;
 						boolean valid = false;
 						boolean changeDB = false;
 						do {
@@ -285,14 +271,13 @@ public class UserInterfaceMenu {
 								int response = JOptionPane.showConfirmDialog(null,
 										"This will remove the Item from your shopping cart. Do you wish to continue?",
 										"Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-								if (response == JOptionPane.NO_OPTION) {
+								if (response == JOptionPane.NO_OPTION || response == JOptionPane.CANCEL_OPTION) {
 									valid = true;
 								} else if (response == JOptionPane.YES_OPTION) {
 									valid = true;
 									changeDB = true;
-								} else if (response == JOptionPane.CANCEL_OPTION) {
-									valid = true;
-								} else
+								}
+								else
 									valid = false;
 							}
 
@@ -304,18 +289,22 @@ public class UserInterfaceMenu {
 							}
 						} while (!valid);
 						if(changeDB){
-							databaseFetcher.updateShoppingCartFile(Integer.toString(currentUser.getUserID()),
-									customer.getCart().getMediaItemByName(choice).getMediaID(), qty);
-							if(Integer.parseInt(qty) == 0)
-								customer.getCart().removeItem(databaseFetcher.getMediaItemByName(choice));
+							String infoString = currentUser.getUsername() + "," + choice + "," + qty;
+							concreteCommandName = "CF_ChangeQuantityCommand";
+							concreteReceiverName = "CartOperation";
+							executeInvoker(infoString, concreteCommandName, concreteReceiverName);
+						
 						}
 						
+						
+						changeQuantityCommand += "," + qty; 
 					}
 
 					else if (choice.equals("Checkout")) {
 						// option to buy or cancel
 						String message = "";
-						for (Map.Entry<MediaItem, String> entry : cartList.entrySet()) {
+						String infoString = "";
+						for (Map.Entry<MediaItem, String> entry : customer.getCart().getCartList().entrySet()) {
 
 							message += entry.getKey().getTitle() + "      Quantity: " + entry.getValue()
 							+ "\t          €" + entry.getKey().getPrice() + "\n";
@@ -335,7 +324,7 @@ public class UserInterfaceMenu {
 						if (response == 0) {
 							// ship all items to address
 							{
-								String infoString = customer.getUsername()+","+customer.getUserID()+","+"Ship to Address"+",";
+								infoString = customer.getUsername()+","+customer.getUserID()+","+"Ship to Address"+",";
 								
 									//TODO! take out this choice : don't use Credit card anymore
 									String paymentChoice = paymentMethod();
@@ -344,7 +333,7 @@ public class UserInterfaceMenu {
 										infoString += paymentChoice;
 										
 										concreteCommandName = "CF_CheckoutShoppingCartCommand";
-										concreteReceiverName = "CartCheckout";
+										concreteReceiverName = "CartOperation";
 										executeInvoker(infoString, concreteCommandName, concreteReceiverName);
 										
 										
@@ -361,8 +350,9 @@ public class UserInterfaceMenu {
 						if (response == JOptionPane.NO_OPTION) {
 							break;
 						} else if (response == JOptionPane.YES_OPTION) {
-							customer.getCart().clearCart();
-							databaseFetcher.clearUsersCart(Integer.toString(currentUser.getUserID()));
+							concreteCommandName = "CF_ClearCartCommand";
+							concreteReceiverName = "CartOperation";
+							executeInvoker(currentUser.getUsername(), concreteCommandName, concreteReceiverName);
 						} else if (response == JOptionPane.CLOSED_OPTION)
 							break;
 					}
@@ -1325,7 +1315,7 @@ public class UserInterfaceMenu {
 		infoString += media.getTitle() + ",";
 		Object [] selection = {"Buy Media Item", "Add To Cart", "Cancel"};
 		String opt= (String) JOptionPane.showInputDialog(null, media.toString(),"Customer : " + currentUser.getName(), 1 , null, selection, selection[0]);
-	
+		
 		if(opt.equalsIgnoreCase("Buy Media Item"))
 		{
 			if(media.getMediaType().equalsIgnoreCase("GAME"))

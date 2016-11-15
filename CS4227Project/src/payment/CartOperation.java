@@ -16,10 +16,47 @@ import userInterface.UserInterfaceMenu;
 import users.CustomerClass;
 import users.UserClass;
 
-public class CartCheckout implements I_Receiver {
+public class CartOperation implements I_Receiver {
 	
 	Database database = Database.getInstance();
 
+	
+	public void updateQty(String username_mediaName_qty) throws Exception
+	{
+		String[] arr = username_mediaName_qty.split(",");
+		String username = arr[0];
+		String mediaName = arr[1];
+		String qty = arr[2];
+		UserClass customer= database.getUserByName(username);
+		CustomerClass cust= (CustomerClass)customer; //Casting from Userclass to CustomerClass
+		ShoppingCart cart = cust.getCart();
+		MediaItem m = database.getMediaItemByName(mediaName);
+		if(!cart.checkIfItemExists(m)){
+			cart.addItem(m,qty);
+		}
+		if(Integer.parseInt(qty) == 0)
+			cart.removeItem(m);
+		else
+			cart.updateQuantity(m, qty);
+		database.updateShoppingCartFile(Integer.toString(cust.getUserID()),
+				database.getMediaItemByName(mediaName).getMediaID(), qty);
+		
+	}
+	
+	public void clearCart(String username)
+	{
+		UserClass customer= database.getUserByName(username);
+		CustomerClass cust= (CustomerClass)customer; 
+		cust.getCart().clearCart();
+		try {
+			database.clearUsersCart(Integer.toString(cust.getUserID()));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
 	
 	//TODO! should take out Credit card functionality altogether and just us wallet
 	public void processPayment(String username_cartID_purchaseType_paymentOption) throws IOException

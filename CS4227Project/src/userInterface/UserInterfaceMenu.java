@@ -178,230 +178,20 @@ public class UserInterfaceMenu {
 			}
 		}
 		
-		if(type.matches("Customer"))
+		if(type.equalsIgnoreCase("Customer"))
 		{
 			CustomerClass customer = ((CustomerClass)currentUser);
 			customer.setCart(databaseFetcher.initializeUsersShoppingCart(Integer.toString(customer.getUserID())));
 			while(stillLoggedIn)
 			{
-				// this shows the Customer dropdown menu and returns the selection from it
 				returnedMenuSelection = showCustomerMenu();
-				
-				if(returnedMenuSelection.equalsIgnoreCase("Browse Media Catalogue"))
-				{
-					MediaItem item = browseMediaList("OUR_DATABASE");
-					if(item!=null)
-						purchasingOptions(item);
-				}
-				
-				else if(returnedMenuSelection.equalsIgnoreCase("Search for Media Item"))
-				{
-					MediaItem media = searchforItem("MEGASTREAM");
 
-					// move purchasing code to a separate purchasingOptions(media) function that browse media can use too
-					// purchasingOpions(media) will return the info string that gets passed to invoker
-					
-					if(media!=null)
-					{
-						// infoString : username_mediaTitle_purchaseType_paymentOption
-						String infoString = currentUser.getUsername() + ",";
-						infoString += media.getTitle() + ",";
-						
-						purchasingOptions(media);
-
-					}
-				}
-				
-				else if(returnedMenuSelection.equalsIgnoreCase("Activate Promotion"))					
-				{	
-					String choice = displayItemsFromCart(customer);		
-					customer.getCart().updatePrice(databaseFetcher.getMediaItemByName(choice));
-				}
-				
-				else if(returnedMenuSelection.equalsIgnoreCase("View Shopping Cart"))					
-				{
-					
-					String choice = displayShoppingCartMenu();
-					// userMenu.userActions(returnedSelection, choice);
-					if (choice.equals("Display Items")) {
-					
-						String mediaTitle = displayItemsFromCart(customer);
-					}
-
-					
-					//
-					else if (choice.equals("Delete Items")) {
-						String infoString = "";
-						boolean done = false;
-						do {
-							
-							String select = displayItemsFromCart(customer);
-							if(!select.equals("Cancel"))
-							{
-								infoString = currentUser.getUsername() + "," + select + "," + "0";
-								
-								concreteCommandName = "CF_ChangeQuantityCommand";
-								concreteReceiverName = "CartOperation";
-								executeInvoker(infoString, concreteCommandName, concreteReceiverName);
-								
-							}
-							//so, this was going to jsut check if they were done but I'd say I just but in a boolean when implementing it. We're going to find a lot of those
-							// ok cool so this is the method that I have extracted :) i'm gonna just have this one method for browse update qty and delete!
-							done = true;
-						} while (!done);
-					}
-
-					else if (choice.equals("Change Quantity of an Item")) {
-						String qty;
-					
-						choice = displayItemsFromCart(customer);
-						String changeQuantityCommand = choice;
-						boolean valid = false;
-						boolean changeDB = false;
-						do {
-							qty = (String) JOptionPane.showInputDialog(null,
-									"What quantity would you like to change " + choice + " to?");
-							// gets qty, chnage to int
-							if (Integer.parseInt(qty) < 0) {
-								JOptionPane.showMessageDialog(null, "You cannot enter a quantity less than 0!",
-										"Quantity Input Error", JOptionPane.ERROR_MESSAGE);
-							}
-
-							else if (Integer.parseInt(qty) == 0) {
-								int response = JOptionPane.showConfirmDialog(null,
-										"This will remove the Item from your shopping cart. Do you wish to continue?",
-										"Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-								if (response == JOptionPane.NO_OPTION || response == JOptionPane.CANCEL_OPTION) {
-									valid = true;
-								} else if (response == JOptionPane.YES_OPTION) {
-									valid = true;
-									changeDB = true;
-								}
-								else
-									valid = false;
-							}
-
-							else if (qty == "" || qty == null || qty.length() <= 0)
-								valid = false;
-							else {
-								valid = true;
-								changeDB = true;
-							}
-						} while (!valid);
-						if(changeDB){
-							String infoString = currentUser.getUsername() + "," + choice + "," + qty;
-							concreteCommandName = "CF_ChangeQuantityCommand";
-							concreteReceiverName = "CartOperation";
-							executeInvoker(infoString, concreteCommandName, concreteReceiverName);
-						
-						}
-						
-						
-						changeQuantityCommand += "," + qty; 
-					}
-
-					else if (choice.equals("Checkout")) {
-						// option to buy or cancel
-						String message = "";
-						String infoString = "";
-						for (Map.Entry<MediaItem, String> entry : customer.getCart().getCartList().entrySet()) {
-
-							message += entry.getKey().getTitle() + "      Quantity: " + entry.getValue()
-							+ "\t          €" + entry.getKey().getPrice() + "\n";
-
-						}
-						message += "\nTotal Discount : € " + (String.format("%.2f",customer.getCart().getDiscountTotal())) + "\nTotal Price is : € " + customer.getCart().getTotalCost();
-						JOptionPane.showMessageDialog(null, message);
-
-						JFrame frame = new JFrame();
-
-						Object stringArray[] = { "Ship to Address", "Cancel" };
-						int response = JOptionPane.showOptionDialog(frame,
-								"All Items will be shipped to registered Address!",
-								"Select an Option", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
-								stringArray, stringArray[0]);
-
-						if (response == 0) {
-							// ship all items to address
-							{
-								infoString = customer.getUsername()+","+customer.getUserID()+","+"Ship to Address"+",";
-								
-									//TODO! take out this choice : don't use Credit card anymore
-									String paymentChoice = paymentMethod();
-									if(!paymentChoice.equals("Cancel"))
-									{
-										infoString += paymentChoice;
-										
-										concreteCommandName = "CF_CheckoutShoppingCartCommand";
-										concreteReceiverName = "CartOperation";
-										executeInvoker(infoString, concreteCommandName, concreteReceiverName);
-										
-										
-									}
-							}
-						} else if (response == JOptionPane.CLOSED_OPTION || response == 1) {
-							break;
-						}
-
-					} else if (choice.equals("Clear Shopping Cart")) {
-						int response = JOptionPane.showConfirmDialog(null,
-								"This will clear all Items in your shopping cart!! Do you want to continue?", "Confirm",
-								JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-						if (response == JOptionPane.NO_OPTION) {
-							break;
-						} else if (response == JOptionPane.YES_OPTION) {
-							concreteCommandName = "CF_ClearCartCommand";
-							concreteReceiverName = "CartOperation";
-							executeInvoker(currentUser.getUsername(), concreteCommandName, concreteReceiverName);
-						} else if (response == JOptionPane.CLOSED_OPTION)
-							break;
-					}
-
-					else if (choice.equals("Quit")) {
-						break;
-					}
-				}
-				else if(returnedMenuSelection.equalsIgnoreCase("View Media Repository"))
-				{
-					//to be filled
-					//String returnString = currentUser.getUserID() + ",";
-					int userID = currentUser.getUserID();
-					String chosenMediaItemName = viewCustomersMediaRepository(userID);
-					if(!chosenMediaItemName.equals("Cancel"))
-					{	
-						concreteCommandName = "CF_StreamMediaCommand";
-						concreteReceiverName = "StreamMedia";
-						executeInvoker(chosenMediaItemName, concreteCommandName, concreteReceiverName);
-						
-					}
-				}
-				else if(returnedMenuSelection.equalsIgnoreCase("Add Funds to Wallet"))
-				{
-					String username= currentUser.getUsername();
-					String ammount= amountToAddToWallet();
-					
-					
-					if(ammount!= "Cancel")
-					{
-						String confirmation= confirmPurchase();
-						if(confirmation!= "Cancel")
-						{
-							String id_amount= username + "," + ammount;
-							
-							concreteCommandName = "CF_AddFundsToWalletCommand";
-							concreteReceiverName = "AddToWallet";
-							executeInvoker(id_amount, concreteCommandName, concreteReceiverName);
-						}
-					}
-				}
-				
-				else if(returnedMenuSelection.equalsIgnoreCase("View Profile"))
-				{
-					
-				}
-				else if(returnedMenuSelection.equals("Logout")){
-					//this will break the loop and log user out
+				if(returnedMenuSelection.equalsIgnoreCase("Logout")){
 					stillLoggedIn = false;
+				}
+				else
+				{
+					customerMenuChoices(returnedMenuSelection, customer);
 				}
 			}
 		}
@@ -422,6 +212,8 @@ public class UserInterfaceMenu {
 		}
 	}
 	
+	
+
 	public void adminMenuChoices(String menuSelection) throws IOException
 	{
 		if(menuSelection.equalsIgnoreCase("Add User"))
@@ -455,6 +247,231 @@ public class UserInterfaceMenu {
 			concreteReceiverName = "C_AdminActions";
 			executeInvoker(updateUser, concreteCommandName, concreteReceiverName);
 			
+		}
+	}
+	
+	private void customerMenuChoices(String returnedMenuSelection, CustomerClass customer) throws FileNotFoundException {
+		
+	
+		if(returnedMenuSelection.equalsIgnoreCase("Browse Media Catalogue"))
+		{
+			MediaItem item = browseMediaList("OUR_DATABASE");
+			if(item!=null)
+				purchasingOptions(item);
+		}
+		
+		else if(returnedMenuSelection.equalsIgnoreCase("Search for Media Item"))
+		{
+			MediaItem media = searchforItem("MEGASTREAM");
+
+			// move purchasing code to a separate purchasingOptions(media) function that browse media can use too
+			// purchasingOpions(media) will return the info string that gets passed to invoker
+			
+			if(media!=null)
+			{
+				// infoString : username_mediaTitle_purchaseType_paymentOption
+				String infoString = currentUser.getUsername() + ",";
+				infoString += media.getTitle() + ",";
+				
+				purchasingOptions(media);
+
+			}
+		}
+		
+		else if(returnedMenuSelection.equalsIgnoreCase("Activate Promotion"))					
+		{	
+			String choice = displayItemsFromCart(customer);		
+			customer.getCart().updatePrice(databaseFetcher.getMediaItemByName(choice));
+		}
+		
+		else if(returnedMenuSelection.equalsIgnoreCase("View Shopping Cart"))					
+		{
+			viewingShoppingCart(customer);
+		}
+		
+		
+		else if(returnedMenuSelection.equalsIgnoreCase("View Media Repository"))
+		{
+			//to be filled
+			//String returnString = currentUser.getUserID() + ",";
+			int userID = currentUser.getUserID();
+			String chosenMediaItemName = viewCustomersMediaRepository(userID);
+			if(!chosenMediaItemName.equals("Cancel"))
+			{	
+				concreteCommandName = "CF_StreamMediaCommand";
+				concreteReceiverName = "StreamMedia";
+				executeInvoker(chosenMediaItemName, concreteCommandName, concreteReceiverName);
+				
+			}
+		}
+		else if(returnedMenuSelection.equalsIgnoreCase("Add Funds to Wallet"))
+		{
+			String username= currentUser.getUsername();
+			String ammount= amountToAddToWallet();
+			
+			
+			if(ammount!= "Cancel")
+			{
+				String confirmation= confirmPurchase();
+				if(confirmation!= "Cancel")
+				{
+					String id_amount= username + "," + ammount;
+					
+					concreteCommandName = "CF_AddFundsToWalletCommand";
+					concreteReceiverName = "AddToWallet";
+					executeInvoker(id_amount, concreteCommandName, concreteReceiverName);
+				}
+			}
+		}
+		
+	}
+
+	/**
+	 * @param customer
+	 */
+	private void viewingShoppingCart(CustomerClass customer) {
+		boolean whileStillInCart=true;
+		while(whileStillInCart)
+		{
+			String choice = displayShoppingCartMenu();
+			// userMenu.userActions(returnedSelection, choice);
+			if (choice.equals("Display Items")) {
+			
+				String mediaTitle = displayItemsFromCart(customer);
+			}
+
+			
+			//
+			else if (choice.equals("Delete Items")) {
+				String infoString = "";
+				boolean done = false;
+				do {
+					
+					String select = displayItemsFromCart(customer);
+					if(!select.equals("Cancel"))
+					{
+						infoString = currentUser.getUsername() + "," + select + "," + "0";
+						
+						concreteCommandName = "CF_ChangeQuantityCommand";
+						concreteReceiverName = "CartOperation";
+						executeInvoker(infoString, concreteCommandName, concreteReceiverName);
+						
+					}
+					//so, this was going to jsut check if they were done but I'd say I just but in a boolean when implementing it. We're going to find a lot of those
+					// ok cool so this is the method that I have extracted :) i'm gonna just have this one method for browse update qty and delete!
+					done = true;
+				} while (!done);
+			}
+
+			else if (choice.equals("Change Quantity of an Item")) {
+				String qty;
+			
+				choice = displayItemsFromCart(customer);
+				String changeQuantityCommand = choice;
+				boolean valid = false;
+				boolean changeDB = false;
+				do {
+					qty = (String) JOptionPane.showInputDialog(null,
+							"What quantity would you like to change " + choice + " to?");
+					// gets qty, chnage to int
+					if (Integer.parseInt(qty) < 0) {
+						JOptionPane.showMessageDialog(null, "You cannot enter a quantity less than 0!",
+								"Quantity Input Error", JOptionPane.ERROR_MESSAGE);
+					}
+
+					else if (Integer.parseInt(qty) == 0) {
+						int response = JOptionPane.showConfirmDialog(null,
+								"This will remove the Item from your shopping cart. Do you wish to continue?",
+								"Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+						if (response == JOptionPane.NO_OPTION || response == JOptionPane.CANCEL_OPTION) {
+							valid = true;
+						} else if (response == JOptionPane.YES_OPTION) {
+							valid = true;
+							changeDB = true;
+						}
+						else
+							valid = false;
+					}
+
+					else if (qty == "" || qty == null || qty.length() <= 0)
+						valid = false;
+					else {
+						valid = true;
+						changeDB = true;
+					}
+				} while (!valid);
+				if(changeDB){
+					String infoString = currentUser.getUsername() + "," + choice + "," + qty;
+					concreteCommandName = "CF_ChangeQuantityCommand";
+					concreteReceiverName = "CartOperation";
+					executeInvoker(infoString, concreteCommandName, concreteReceiverName);
+				
+				}
+				
+				
+				changeQuantityCommand += "," + qty; 
+			}
+
+			else if (choice.equals("Checkout")) {
+				// option to buy or cancel
+				String message = "";
+				String infoString = "";
+				for (Map.Entry<MediaItem, String> entry : customer.getCart().getCartList().entrySet()) {
+
+					message += entry.getKey().getTitle() + "      Quantity: " + entry.getValue()
+					+ "\t          €" + entry.getKey().getPrice() + "\n";
+
+				}
+				message += "\nTotal Discount : € " + (String.format("%.2f",customer.getCart().getDiscountTotal())) + "\nTotal Price is : € " + customer.getCart().getTotalCost();
+				JOptionPane.showMessageDialog(null, message);
+
+				JFrame frame = new JFrame();
+
+				Object stringArray[] = { "Ship to Address", "Cancel" };
+				int response = JOptionPane.showOptionDialog(frame,
+						"All Items will be shipped to registered Address!",
+						"Select an Option", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+						stringArray, stringArray[0]);
+
+				if (response == 0) {
+					// ship all items to address
+					{
+						infoString = customer.getUsername()+","+customer.getUserID()+","+"Ship to Address"+",";
+						
+							//TODO! take out this choice : don't use Credit card anymore
+							String paymentChoice = paymentMethod();
+							if(!paymentChoice.equals("Cancel"))
+							{
+								infoString += paymentChoice;
+								
+								concreteCommandName = "CF_CheckoutShoppingCartCommand";
+								concreteReceiverName = "CartOperation";
+								executeInvoker(infoString, concreteCommandName, concreteReceiverName);
+								
+								
+							}
+					}
+				} else if (response == JOptionPane.CLOSED_OPTION || response == 1) {
+					break;
+				}
+
+			} else if (choice.equals("Clear Shopping Cart")) {
+				int response = JOptionPane.showConfirmDialog(null,
+						"This will clear all Items in your shopping cart!! Do you want to continue?", "Confirm",
+						JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+				if (response == JOptionPane.NO_OPTION) {
+					break;
+				} else if (response == JOptionPane.YES_OPTION) {
+					concreteCommandName = "CF_ClearCartCommand";
+					concreteReceiverName = "CartOperation";
+					executeInvoker(currentUser.getUsername(), concreteCommandName, concreteReceiverName);
+				} else if (response == JOptionPane.CLOSED_OPTION)
+					break;
+			}
+
+			else if (choice.equals("Quit")) {
+				whileStillInCart=false;
+			}
 		}
 	}
 	
@@ -936,138 +953,6 @@ public class UserInterfaceMenu {
 			}
 			
 			
-			//REFACTORING_DONE_HERE
-//			public MediaItem browseMediaList(String whichCatalogue)
-//			{
-//				ArrayList<MediaItem> mediaList=null;
-//				MediaItem item = null;
-//				if (whichCatalogue.equalsIgnoreCase("OUR_DATABASE")
-//					mediaList= databaseFetcher.getMediaItems();
-//				
-//				else if(whichCatalogue.equalsIgnoreCase("Supplier"))
-//					mediaList = databaseFetcher.getSupplierItems();
-//				
-//				//mediaList = databaseFetcher.getMediaItems();
-//				boolean stillSearching = true, firstFive = false;
-//				int k = 0;
-//				String selectedItem = "";
-//				int remainder = mediaList.size()%5;
-//				if(mediaList.size() == 0)
-//				{
-//					JOptionPane.showMessageDialog(null, "There are no media items in the database!", "Error", JOptionPane.ERROR_MESSAGE);
-//				}
-//				while(stillSearching)
-//				{
-//					firstFive = false;
-//					if(mediaList.size() <= 5)
-//					{
-//						if(mediaList.size() == 5)
-//						{
-//							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), mediaList.get(k+3).getMediaType()+" - " + mediaList.get(k+3).getTitle(), mediaList.get(k+4).getMediaType()+" - " + mediaList.get(k+4).getTitle(), "Quit"};
-//							selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-//							firstFive = true;
-//						}
-//						else if(remainder == 1)
-//						{
-//							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), "Quit"};
-//							selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-//							firstFive = true;
-//						}
-//						else if(remainder == 2)
-//						{
-//							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), "Quit"};
-//							selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-//							firstFive = true;
-//						}
-//						else if(remainder == 3)
-//						{
-//							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), "Quit"};
-//							selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-//							firstFive = true;
-//						}
-//						else if(remainder == 4)
-//						{
-//							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), mediaList.get(k+3).getMediaType()+" - " + mediaList.get(k+3).getTitle(), "Quit"};
-//							selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-//							firstFive = true;
-//						}
-//					}
-//					if(!firstFive)
-//					{
-//						if(k == 0)
-//						{	
-//							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), mediaList.get(k+3).getMediaType()+" - " + mediaList.get(k+3).getTitle(), mediaList.get(k+4).getMediaType()+" - " + mediaList.get(k+4).getTitle(), "Show Next 5", "Quit"};
-//							selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-//						}
-//						else if(k == mediaList.size()-remainder)
-//						{
-//							if(remainder == 1)
-//							{
-//								Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), "Show Previous 5", "Quit"};
-//								selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-//							}
-//							else if(remainder == 2)
-//							{
-//								Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), "Show Previous 5", "Quit"};
-//								selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-//							}
-//							else if(remainder == 3)
-//							{
-//								Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), "Show Previous 5", "Quit"};
-//								selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-//							}
-//							else if(remainder == 4)
-//							{
-//								Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k+1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k+2).getTitle(), mediaList.get(k+3).getMediaType()+" - " + mediaList.get(k+3).getTitle(), "Show Previous 5", "Quit"};
-//								selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-//							}
-//						}
-//						else
-//						{
-//							Object [] selection = {mediaList.get(k).getMediaType()+" - " + mediaList.get(k).getTitle(), mediaList.get(k+1).getMediaType()+" - " + mediaList.get(k + 1).getTitle(), mediaList.get(k+2).getMediaType()+" - " + mediaList.get(k + 2).getTitle(), mediaList.get(k+3).getMediaType()+" - " + mediaList.get(k + 3).getTitle(), mediaList.get(k+4).getMediaType()+" - " + mediaList.get(k + 4).getTitle(), "Show Previous 5", "Show Next 5", "Quit"};
-//							selectedItem = (String) JOptionPane.showInputDialog(null, "Film List", "Please Select A Film",1, null, selection, selection[0]);
-//						}
-//					}
-//					
-//					if(selectedItem.equals("Quit"))
-//						stillSearching=false;
-//					else if(selectedItem.equals("Show Next 5"))
-//					{
-//						k += 5;
-//					}
-//					else if(selectedItem.equals("Show Previous 5"))
-//					{
-//						k -= 5;
-//					}
-//					 else 
-//					{
-//						stillSearching=false;
-//						boolean filmFound=false;
-//						for(int i = 0; i < mediaList.size() && !filmFound; i++)
-//						{
-//							if(selectedItem.equals(mediaList.get(i).getMediaType()+" - " + mediaList.get(i).getTitle()))
-//							{
-//								if (whichCatalogue.equalsIgnoreCase("Staff"))
-//								{
-//									item = databaseFetcher.getMediaItemByName(mediaList.get(i).getTitle());
-//									filmFound = true;
-//								}
-//								else if (whichCatalogue.equalsIgnoreCase("Supplier"))
-//								{
-//									item = databaseFetcher.getSupplierItemByName(mediaList.get(i).getTitle());
-//									filmFound = true;
-//								}
-//								else if (whichCatalogue.equalsIgnoreCase("Customer"))
-//								{
-//									purchasingOptions(mediaList.get(i));
-//									filmFound = true;
-//								}
-//							}
-//						}
-//					} 
-//				}
-//				return item;
-//			}
 			
 			public String ItemToUpdate()
 			{

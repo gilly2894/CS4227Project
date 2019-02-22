@@ -13,11 +13,11 @@ import users.*;
 
 public class Database {
 UserFactory userFactory = new UserFactory();
-	private final String usersDatabase = "users.txt";
-	private final String mediaItemsDatabase = "mediaItems.txt";
-	private final String customerRepository = "customerRepository.txt";
-	private final String shoppingCart = "shoppingCart.txt";
-	private final String supplierDatabase = "Supplier.txt";
+	private final String usersDatabase = "/Users/denis/IdeaProjects/CS4227Project/CS4227Project/users.txt";
+	private final String mediaItemsDatabase = "/Users/denis/IdeaProjects/CS4227Project/CS4227Project/mediaItems.txt";
+	private final String customerRepository = "/Users/denis/IdeaProjects/CS4227Project/CS4227Project/customerRepository.txt";
+	private final String shoppingCart = "/Users/denis/IdeaProjects/CS4227Project/CS4227Project/shoppingCart.txt";
+	private final String supplierDatabase = "/Users/denis/IdeaProjects/CS4227Project/CS4227Project/Supplier.txt";
 	
 	File usersFile = new File(usersDatabase);
 	File mediaItemsFile = new File(mediaItemsDatabase);
@@ -210,7 +210,7 @@ UserFactory userFactory = new UserFactory();
 		public UserClass getUserByName(String nameOfUser)
 		{
 			boolean found=false;
-			for(int i=0; i<usersList.size() && !found; i++)
+			for(int i=0; i< usersList.size() && !found; i++)
 			{
 				if(nameOfUser.matches((usersList.get(i)).getUsername()))
 				{
